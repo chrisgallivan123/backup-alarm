@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Alarm — Battery Nudge Concept</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+    background: #000;
+    color: #fff;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 0;
+  }
+
+  .phone-frame {
+    width: 100%;
+    max-width: 393px;
+    min-height: 100vh;
+    background: #000;
+    position: relative;
+  }
+
+  /* Status bar */
+  .status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px 8px;
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .status-bar .time { font-size: 16px; font-weight: 700; }
+
+  .status-bar .icons {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    font-size: 13px;
+  }
+
+  /* Header */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 20px 16px;
+  }
+
+  .header .edit { color: #ff9f0a; font-size: 17px; }
+  .header .add { color: #ff9f0a; font-size: 28px; font-weight: 300; }
+
+  /* Alarm list */
+  .alarm-list { padding: 0 20px; }
+
+  .section-label {
+    color: #86868b;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 16px 0 8px;
+  }
+
+  .alarm-item {
+    padding: 14px 0;
+    border-bottom: 0.5px solid #38383a;
+  }
+
+  .alarm-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .alarm-time {
+    font-size: 54px;
+    font-weight: 200;
+    letter-spacing: -2px;
+    line-height: 1;
+    transition: color 0.3s;
+  }
+
+  .alarm-time.off { color: #48484a; }
+
+  .alarm-time .period {
+    font-size: 26px;
+    font-weight: 300;
+    margin-left: 2px;
+  }
+
+  .alarm-label {
+    font-size: 15px;
+    color: #86868b;
+    margin-top: 2px;
+  }
+
+  /* Toggle switch */
+  .toggle {
+    width: 51px;
+    height: 31px;
+    border-radius: 16px;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.3s;
+    flex-shrink: 0;
+  }
+
+  .toggle.on { background: #34c759; }
+  .toggle.off { background: #38383a; }
+
+  .toggle .knob {
+    width: 27px;
+    height: 27px;
+    border-radius: 14px;
+    background: #fff;
+    position: absolute;
+    top: 2px;
+    transition: left 0.3s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  }
+
+  .toggle.on .knob { left: 22px; }
+  .toggle.off .knob { left: 2px; }
+
+  /* Battery nudge — inline under alarm */
+  .nudge {
+    margin-top: 10px;
+    padding: 12px 14px;
+    background: #1c1c1e;
+    border-radius: 12px;
+    border-left: 4px solid #ff453a;
+    display: none;
+    animation: slideIn 0.4s ease-out;
+  }
+
+  .nudge.warning {
+    border-left-color: #ff9f0a;
+  }
+
+  .nudge.visible { display: block; }
+
+  .nudge-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+
+  .nudge-icon { font-size: 15px; }
+
+  .nudge-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #ff453a;
+  }
+
+  .nudge.warning .nudge-title {
+    color: #ff9f0a;
+  }
+
+  .nudge-predicted {
+    font-size: 20px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 4px;
+  }
+
+  .nudge-action {
+    font-size: 14px;
+    color: #ebebf5cc;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .battery-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 20px;
+    font-size: 13px;
+    color: #86868b;
+  }
+
+  .battery-bar {
+    width: 25px;
+    height: 11px;
+    border: 1px solid #86868b;
+    border-radius: 2px;
+    position: relative;
+    display: inline-block;
+  }
+
+  .battery-bar::after {
+    content: '';
+    position: absolute;
+    right: -4px;
+    top: 2px;
+    width: 2px;
+    height: 5px;
+    background: #86868b;
+    border-radius: 0 1px 1px 0;
+  }
+
+  .battery-fill {
+    height: 100%;
+    border-radius: 1px;
+    transition: width 0.3s, background 0.3s;
+  }
+
+  /* Persona label under alarm name */
+  .persona-hint {
+    font-size: 12px;
+    color: #636366;
+    margin-top: 1px;
+  }
+</style>
+</head>
+<body>
+<div class="phone-frame">
+
+  <!-- Status bar -->
+  <div class="status-bar">
+    <span class="time">10:47 PM</span>
+    <span class="icons">
+      <span>5G</span>
+      <span id="batteryText">34%</span>
+      <span>🔋</span>
+    </span>
+  </div>
+
+  <!-- Header -->
+  <div class="header">
+    <span class="edit">Edit</span>
+    <span class="add">+</span>
+  </div>
+
+  <h1 style="padding: 0 20px 8px; font-size: 34px; font-weight: 700;">Alarms</h1>
+
+  <!-- Battery indicator -->
+  <div class="battery-indicator">
+    <div class="battery-bar">
+      <div class="battery-fill" id="batteryFill" style="width: 34%; background: #ff453a;"></div>
+    </div>
+    <span id="batteryLabel">Not Charging</span>
+  </div>
+
+  <!-- Alarm list -->
+  <div class="alarm-list">
+
+    <!-- Chris -->
+    <div class="alarm-item" id="alarm-chris">
+      <div class="alarm-row">
+        <div>
+          <div class="alarm-time off" id="time-chris">5<span style="font-size:54px">:</span>00 <span class="period">AM</span></div>
+          <div class="alarm-label">EMEA Standup</div>
+          <div class="persona-hint">Chris — 34%, 6hrs away</div>
+        </div>
+        <div class="toggle off" id="toggle-chris" onclick="toggleAlarm('chris')">
+          <div class="knob"></div>
+        </div>
+      </div>
+      <div class="nudge" id="nudge-chris"></div>
+    </div>
+
+    <!-- Jen -->
+    <div class="alarm-item" id="alarm-jen">
+      <div class="alarm-row">
+        <div>
+          <div class="alarm-time off" id="time-jen">5<span style="font-size:54px">:</span>30 <span class="period">AM</span></div>
+          <div class="alarm-label">🩰 Competition Call Time</div>
+          <div class="persona-hint">Jen — 55%, 7hrs away</div>
+        </div>
+        <div class="toggle off" id="toggle-jen" onclick="toggleAlarm('jen')">
+          <div class="knob"></div>
+        </div>
+      </div>
+      <div class="nudge" id="nudge-jen"></div>
+    </div>
+
+    <!-- Naiyah -->
+    <div class="alarm-item" id="alarm-naiyah">
+      <div class="alarm-row">
+        <div>
+          <div class="alarm-time off" id="time-naiyah">6<span style="font-size:54px">:</span>15 <span class="period">AM</span></div>
+          <div class="alarm-label">🩰 Duet — Don't Let Riley Down</div>
+          <div class="persona-hint">Naiyah — 22%, 5hrs away</div>
+        </div>
+        <div class="toggle off" id="toggle-naiyah" onclick="toggleAlarm('naiyah')">
+          <div class="knob"></div>
+        </div>
+      </div>
+      <div class="nudge" id="nudge-naiyah"></div>
+    </div>
+
+    <!-- Thomas -->
+    <div class="alarm-item" id="alarm-thomas">
+      <div class="alarm-row">
+        <div>
+          <div class="alarm-time off" id="time-thomas">7<span style="font-size:54px">:</span>00 <span class="period">AM</span></div>
+          <div class="alarm-label">Doctor's Appointment</div>
+          <div class="persona-hint">Thomas — 80%, 8hrs away</div>
+        </div>
+        <div class="toggle off" id="toggle-thomas" onclick="toggleAlarm('thomas')">
+          <div class="knob"></div>
+        </div>
+      </div>
+      <div class="nudge" id="nudge-thomas"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const alarms = {
+  chris:  { batteryLevel: 34, drainRatePerHour: 8, hoursUntilAlarm: 6, isCharging: false, active: false },
+  jen:    { batteryLevel: 55, drainRatePerHour: 6, hoursUntilAlarm: 7, isCharging: false, active: false },
+  naiyah: { batteryLevel: 22, drainRatePerHour: 12, hoursUntilAlarm: 5, isCharging: false, active: false },
+  thomas: { batteryLevel: 80, drainRatePerHour: 3, hoursUntilAlarm: 8, isCharging: false, active: false },
+};
+
+function predictAlarmRisk({ batteryLevel, drainRatePerHour, hoursUntilAlarm, isCharging }) {
+  if (isCharging) {
+    return { riskLevel: 'safe', predictedBattery: Math.min(100, batteryLevel + (hoursUntilAlarm * 20)), willSurvive: true, nudge: null };
+  }
+
+  const predictedBattery = batteryLevel - (drainRatePerHour * hoursUntilAlarm);
+  const CRITICAL_THRESHOLD = 5;
+  const WARNING_THRESHOLD = 20;
+
+  let riskLevel, nudge;
+
+  if (predictedBattery <= CRITICAL_THRESHOLD) {
+    riskLevel = 'critical';
+    nudge = 'Plug in now.';
+  } else if (predictedBattery <= WARNING_THRESHOLD) {
+    riskLevel = 'warning';
+    nudge = 'Consider plugging in.';
+  } else {
+    riskLevel = 'safe';
+    nudge = null;
+  }
+
+  return { riskLevel, predictedBattery: Math.max(0, Math.round(predictedBattery)), willSurvive: predictedBattery > CRITICAL_THRESHOLD, nudge };
+}
+
+function toggleAlarm(persona) {
+  const alarm = alarms[persona];
+  alarm.active = !alarm.active;
+
+  const toggle = document.getElementById('toggle-' + persona);
+  const timeEl = document.getElementById('time-' + persona);
+  const nudgeEl = document.getElementById('nudge-' + persona);
+
+  if (alarm.active) {
+    toggle.className = 'toggle on';
+    timeEl.classList.remove('off');
+
+    const result = predictAlarmRisk(alarm);
+
+    if (result.nudge) {
+      const titleText = result.riskLevel === 'critical' ? 'Alarm at Risk' : 'Low Battery Warning';
+      const phrases = {
+        chris: `Estimated battery at alarm: ${result.predictedBattery}%`,
+        jen: `Estimated battery at alarm: ${result.predictedBattery}%`,
+        naiyah: `Estimated battery at alarm: ${result.predictedBattery}%`,
+        thomas: `Estimated battery at alarm: ${result.predictedBattery}%`,
+      };
+      const predictedText = phrases[persona] || `Predicted battery: ${result.predictedBattery}%`;
+      nudgeEl.className = result.riskLevel === 'warning' ? 'nudge warning visible' : 'nudge visible';
+      nudgeEl.innerHTML = `
+        <div class="nudge-header">
+          <span class="nudge-icon">⚠️</span>
+          <span class="nudge-title">${titleText}</span>
+        </div>
+        <div class="nudge-predicted">${predictedText}</div>
+        <div class="nudge-action">${result.nudge}</div>
+      `;
+    } else {
+      nudgeEl.className = 'nudge';
+      nudgeEl.innerHTML = '';
+    }
+  } else {
+    toggle.className = 'toggle off';
+    timeEl.classList.add('off');
+    nudgeEl.className = 'nudge';
+  }
+}
+</script>
+</body>
+</html>
