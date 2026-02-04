@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Alarm — Backup Configuration</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+    background: #000;
+    color: #fff;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 0;
+  }
+
+  .phone-frame {
+    width: 100%;
+    max-width: 393px;
+    min-height: 100vh;
+    background: #000;
+    position: relative;
+  }
+
+  /* Status bar */
+  .status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px 8px;
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .status-bar .time { font-size: 16px; font-weight: 700; }
+
+  .status-bar .icons {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    font-size: 13px;
+  }
+
+  /* Navigation bar */
+  .nav-bar {
+    display: flex;
+    align-items: center;
+    padding: 8px 16px 12px;
+  }
+
+  .nav-back {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: #ff9f0a;
+    font-size: 17px;
+    cursor: pointer;
+  }
+
+  .nav-back .chevron {
+    font-size: 22px;
+    font-weight: 300;
+  }
+
+  .nav-title {
+    flex: 1;
+    text-align: center;
+    font-size: 17px;
+    font-weight: 600;
+    margin-right: 60px; /* balance the back button */
+  }
+
+  /* Page title */
+  .page-title {
+    padding: 0 20px 8px;
+    font-size: 34px;
+    font-weight: 700;
+  }
+
+  /* Section */
+  .section {
+    padding: 0 20px;
+    margin-bottom: 24px;
+  }
+
+  .section-header {
+    color: #86868b;
+    font-size: 13px;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 16px 0 8px;
+  }
+
+  .section-card {
+    background: #1c1c1e;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .section-footer {
+    color: #86868b;
+    font-size: 13px;
+    padding: 8px 0 0;
+    line-height: 1.4;
+  }
+
+  /* Row */
+  .row {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    min-height: 44px;
+    border-bottom: 0.5px solid #38383a;
+  }
+
+  .row:last-child {
+    border-bottom: none;
+  }
+
+  .row-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+    font-size: 16px;
+  }
+
+  .row-content {
+    flex: 1;
+  }
+
+  .row-label {
+    font-size: 17px;
+    color: #fff;
+  }
+
+  .row-sublabel {
+    font-size: 13px;
+    color: #86868b;
+    margin-top: 1px;
+  }
+
+  .row-value {
+    color: #86868b;
+    font-size: 17px;
+    margin-right: 8px;
+  }
+
+  .row-chevron {
+    color: #48484a;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  /* Toggle switch */
+  .toggle {
+    width: 51px;
+    height: 31px;
+    border-radius: 16px;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.3s;
+    flex-shrink: 0;
+  }
+
+  .toggle.on { background: #34c759; }
+  .toggle.off { background: #38383a; }
+
+  .toggle .knob {
+    width: 27px;
+    height: 27px;
+    border-radius: 14px;
+    background: #fff;
+    position: absolute;
+    top: 2px;
+    transition: left 0.3s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  }
+
+  .toggle.on .knob { left: 22px; }
+  .toggle.off .knob { left: 2px; }
+
+  /* Drag handle */
+  .drag-handle {
+    color: #48484a;
+    font-size: 18px;
+    padding: 8px;
+    margin-right: -8px;
+    cursor: grab;
+  }
+
+  /* Device icons */
+  .icon-watch { background: #ff9f0a; }
+  .icon-homepod { background: #5856d6; }
+  .icon-person { background: #ff2d55; }
+  .icon-phone { background: #007aff; }
+  .icon-call { background: #34c759; }
+
+  /* Order number */
+  .order-num {
+    width: 24px;
+    height: 24px;
+    border-radius: 12px;
+    background: #2c2c2e;
+    color: #86868b;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+  }
+
+  /* Empty state */
+  .empty-state {
+    padding: 32px 20px;
+    text-align: center;
+  }
+
+  .empty-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+    opacity: 0.5;
+  }
+
+  .empty-text {
+    color: #86868b;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  /* Backup order list */
+  .backup-list {
+    padding: 8px 0;
+  }
+
+  .backup-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 16px;
+    transition: background 0.2s;
+  }
+
+  .backup-item:active {
+    background: #2c2c2e;
+  }
+
+  .backup-item .row-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    font-size: 18px;
+  }
+
+  /* Timing hint */
+  .timing-hint {
+    background: #1a2a1a;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin: 16px 20px;
+    border-left: 3px solid #34c759;
+  }
+
+  .timing-hint-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #34c759;
+    margin-bottom: 4px;
+  }
+
+  .timing-hint-text {
+    font-size: 13px;
+    color: #86868b;
+    line-height: 1.4;
+  }
+
+  .timing-hint-text strong {
+    color: #aaa;
+  }
+
+  /* Add button */
+  .add-row {
+    color: #007aff;
+  }
+
+  .add-row .row-icon {
+    background: transparent;
+    color: #007aff;
+    font-size: 22px;
+    font-weight: 300;
+  }
+
+  /* Modal */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    justify-content: center;
+    align-items: flex-end;
+    z-index: 100;
+  }
+
+  .modal-content {
+    background: #1c1c1e;
+    border-radius: 12px 12px 0 0;
+    width: 100%;
+    max-width: 393px;
+    max-height: 60vh;
+    overflow: hidden;
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 0.5px solid #38383a;
+  }
+
+  .modal-title {
+    font-size: 17px;
+    font-weight: 600;
+  }
+
+  .modal-close {
+    color: #007aff;
+    font-size: 17px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .modal-body {
+    padding: 0 20px 20px;
+    overflow-y: auto;
+  }
+
+  .available-device {
+    cursor: pointer;
+  }
+
+  .available-device:hover {
+    background: #2c2c2e;
+  }
+
+  /* Swipe to delete */
+  .backup-item-wrapper {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .backup-item {
+    position: relative;
+    background: #1c1c1e;
+    transition: transform 0.2s ease;
+    z-index: 1;
+  }
+
+  .backup-item.swiped {
+    transform: translateX(-80px);
+  }
+
+  .delete-btn {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 80px;
+    background: #ff3b30;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    z-index: 0;
+  }
+
+  .delete-btn:active {
+    background: #d63029;
+  }
+</style>
+</head>
+<body>
+<div class="phone-frame">
+
+  <!-- Status bar -->
+  <div class="status-bar">
+    <span class="time">10:47 PM</span>
+    <span class="icons">
+      <span>5G</span>
+      <span>78%</span>
+      <span>🔋</span>
+    </span>
+  </div>
+
+  <!-- Navigation -->
+  <div class="nav-bar">
+    <div class="nav-back">
+      <span class="chevron">‹</span>
+      <span>Alarm</span>
+    </div>
+    <div class="nav-title">Edit Alarm</div>
+  </div>
+
+  <!-- Main content -->
+  <div class="section">
+    <div class="section-card">
+      <div class="row">
+        <div class="row-content">
+          <div class="row-label">Time</div>
+        </div>
+        <div class="row-value">5:00 AM</div>
+        <div class="row-chevron">›</div>
+      </div>
+      <div class="row">
+        <div class="row-content">
+          <div class="row-label">Label</div>
+        </div>
+        <div class="row-value">EMEA Standup</div>
+        <div class="row-chevron">›</div>
+      </div>
+      <div class="row">
+        <div class="row-content">
+          <div class="row-label">Sound</div>
+        </div>
+        <div class="row-value">Radar</div>
+        <div class="row-chevron">›</div>
+      </div>
+      <div class="row">
+        <div class="row-content">
+          <div class="row-label">Snooze</div>
+        </div>
+        <div class="toggle on" onclick="this.classList.toggle('on'); this.classList.toggle('off');">
+          <div class="knob"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Backup Section -->
+  <div class="section">
+    <div class="section-header">Backup</div>
+    <div class="section-card">
+      <div class="row">
+        <div class="row-content">
+          <div class="row-label">Backup Alarm</div>
+        </div>
+        <div class="toggle on" id="backup-toggle" onclick="toggleBackup()">
+          <div class="knob"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Backup Order (shown when enabled) -->
+  <div class="section" id="backup-order">
+    <div class="section-header">Backup Order</div>
+    <div class="section-card">
+      <div class="backup-list" id="backup-list">
+        <div class="backup-item-wrapper">
+          <div class="backup-item" draggable="true">
+            <div class="order-num">1</div>
+            <div class="row-icon icon-watch">⌚</div>
+            <div class="row-content">
+              <div class="row-label">Apple Watch</div>
+              <div class="row-sublabel">Chris's Watch</div>
+            </div>
+            <div class="drag-handle">☰</div>
+          </div>
+          <div class="delete-btn" onclick="deleteBackup(this)">Delete</div>
+        </div>
+        <div class="backup-item-wrapper">
+          <div class="backup-item" draggable="true">
+            <div class="order-num">2</div>
+            <div class="row-icon icon-homepod">🔊</div>
+            <div class="row-content">
+              <div class="row-label">HomePod</div>
+              <div class="row-sublabel">Bedroom</div>
+            </div>
+            <div class="drag-handle">☰</div>
+          </div>
+          <div class="delete-btn" onclick="deleteBackup(this)">Delete</div>
+        </div>
+        <div class="backup-item-wrapper">
+          <div class="backup-item" draggable="true">
+            <div class="order-num">3</div>
+            <div class="row-icon icon-person">👤</div>
+            <div class="row-content">
+              <div class="row-label">Jen</div>
+              <div class="row-sublabel">Family Sharing</div>
+            </div>
+            <div class="drag-handle">☰</div>
+          </div>
+          <div class="delete-btn" onclick="deleteBackup(this)">Delete</div>
+        </div>
+      </div>
+      <div class="row add-row" onclick="showAddDevice()">
+        <div class="row-icon">+</div>
+        <div class="row-content">
+          <div class="row-label">Add Backup</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Timing preview -->
+  <div class="timing-hint" id="timing-hint">
+    <div class="timing-hint-title">If your iPhone doesn't respond:</div>
+    <div class="timing-hint-text">
+      <strong>5:02</strong> — Alarm on Apple Watch<br>
+      <strong>5:04</strong> — Alarm on HomePod<br>
+      <strong>5:06</strong> — Alarm on Jen's iPhone
+    </div>
+  </div>
+
+  <!-- Add Device Modal -->
+  <div class="modal-overlay" id="add-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">Add Backup</div>
+        <div class="modal-close" onclick="hideAddDevice()">Done</div>
+      </div>
+      <div class="modal-body">
+        <div class="section-header" style="padding-left: 0;">Available Devices</div>
+        <div class="section-card">
+          <div id="available-list">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function formatPhoneNumber(input) {
+  // Strip non-digits
+  const digits = input.replace(/\D/g, '');
+
+  // Format as (XXX) XXX-XXXX if 10 digits
+  if (digits.length === 10) {
+    return `(${digits.slice(0,3)}) ${digits.slice(3,6)}-${digits.slice(6)}`;
+  }
+  // Format as +X (XXX) XXX-XXXX if 11 digits (with country code)
+  if (digits.length === 11) {
+    return `+${digits[0]} (${digits.slice(1,4)}) ${digits.slice(4,7)}-${digits.slice(7)}`;
+  }
+  // Return as-is if doesn't match standard format
+  return input;
+}
+
+function toggleBackup() {
+  const toggle = document.getElementById('backup-toggle');
+  const backupOrder = document.getElementById('backup-order');
+  const timingHint = document.getElementById('timing-hint');
+
+  toggle.classList.toggle('on');
+  toggle.classList.toggle('off');
+
+  const isOn = toggle.classList.contains('on');
+  backupOrder.style.display = isOn ? 'block' : 'none';
+  timingHint.style.display = isOn ? 'block' : 'none';
+}
+
+// --- Swipe/Tap to Delete ---
+let currentSwipedItem = null;
+
+document.querySelectorAll('.backup-item').forEach(item => {
+  setupSwipe(item);
+});
+
+function setupSwipe(item) {
+  // Tap to toggle delete button (works on desktop and mobile)
+  item.addEventListener('click', (e) => {
+    // Don't toggle if clicking drag handle
+    if (e.target.classList.contains('drag-handle')) return;
+
+    // Close any other open item
+    if (currentSwipedItem && currentSwipedItem !== item) {
+      currentSwipedItem.classList.remove('swiped');
+    }
+
+    // Toggle this item
+    item.classList.toggle('swiped');
+    currentSwipedItem = item.classList.contains('swiped') ? item : null;
+  });
+}
+
+function deleteBackup(btn) {
+  const wrapper = btn.parentElement;
+  wrapper.style.height = wrapper.offsetHeight + 'px';
+  wrapper.style.transition = 'height 0.3s ease, opacity 0.3s ease';
+
+  setTimeout(() => {
+    wrapper.style.height = '0';
+    wrapper.style.opacity = '0';
+  }, 10);
+
+  setTimeout(() => {
+    wrapper.remove();
+    updateOrderNumbers();
+    updateTimingHint();
+  }, 300);
+}
+
+// --- Drag and Drop Reordering ---
+let draggedItem = null;
+let draggedWrapper = null;
+
+document.querySelectorAll('.backup-item').forEach(item => {
+  item.addEventListener('dragstart', handleDragStart);
+  item.addEventListener('dragend', handleDragEnd);
+  item.addEventListener('dragover', handleDragOver);
+  item.addEventListener('drop', handleDrop);
+});
+
+function handleDragStart(e) {
+  draggedItem = this;
+  draggedWrapper = this.parentElement;
+  this.style.opacity = '0.4';
+  e.dataTransfer.effectAllowed = 'move';
+}
+
+function handleDragEnd(e) {
+  this.style.opacity = '1';
+  document.querySelectorAll('.backup-item-wrapper').forEach(wrapper => {
+    wrapper.style.borderTop = '';
+  });
+}
+
+function handleDragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+
+  document.querySelectorAll('.backup-item-wrapper').forEach(wrapper => {
+    wrapper.style.borderTop = '';
+  });
+
+  const wrapper = this.parentElement;
+  if (wrapper !== draggedWrapper) {
+    wrapper.style.borderTop = '2px solid #007aff';
+  }
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  const targetWrapper = this.parentElement;
+
+  if (targetWrapper !== draggedWrapper) {
+    const list = document.getElementById('backup-list');
+    const wrappers = [...list.querySelectorAll('.backup-item-wrapper')];
+    const draggedIndex = wrappers.indexOf(draggedWrapper);
+    const targetIndex = wrappers.indexOf(targetWrapper);
+
+    if (draggedIndex < targetIndex) {
+      list.insertBefore(draggedWrapper, targetWrapper.nextSibling);
+    } else {
+      list.insertBefore(draggedWrapper, targetWrapper);
+    }
+
+    updateOrderNumbers();
+    updateTimingHint();
+  }
+}
+
+function updateOrderNumbers() {
+  const wrappers = document.querySelectorAll('.backup-item-wrapper');
+  wrappers.forEach((wrapper, index) => {
+    const orderNum = wrapper.querySelector('.order-num');
+    if (orderNum) orderNum.textContent = index + 1;
+  });
+}
+
+function updateTimingHint() {
+  const wrappers = document.querySelectorAll('.backup-item-wrapper');
+  const hint = document.getElementById('timing-hint');
+  // Backups start at 5:02 (2 min after alarm), then every 2 min
+  const times = ['5:02', '5:04', '5:06', '5:08', '5:10', '5:12', '5:14'];
+
+  if (wrappers.length === 0) {
+    hint.innerHTML = '<div class="timing-hint-title">No backups configured</div><div class="timing-hint-text">Add a device or phone number.</div>';
+    return;
+  }
+
+  let html = '<div class="timing-hint-title">If your iPhone doesn\'t respond:</div><div class="timing-hint-text">';
+
+  wrappers.forEach((wrapper, index) => {
+    const name = wrapper.querySelector('.row-label').textContent;
+    const sublabel = wrapper.querySelector('.row-sublabel').textContent;
+
+    // Check if this is a phone number (sublabel contains "Calls")
+    const isPhoneCall = sublabel.includes('Call');
+
+    if (isPhoneCall) {
+      html += `<strong>${times[index]}</strong> — Call ${name}<br>`;
+    } else {
+      // For devices/people, use "Alarm on" prefix
+      // Handle special cases
+      let displayName = name;
+      if (name === 'Jen' || name === 'Naiyah') {
+        displayName = `${name}'s iPhone`;
+      }
+      html += `<strong>${times[index]}</strong> — Alarm on ${displayName}<br>`;
+    }
+  });
+
+  html += '</div>';
+  hint.innerHTML = html;
+}
+
+// --- Add Device Modal ---
+const availableDevices = [
+  { id: 'ipad', icon: '📱', iconClass: 'icon-phone', name: 'iPad', sublabel: 'Chris\'s iPad' },
+  { id: 'homepod-office', icon: '🔊', iconClass: 'icon-homepod', name: 'HomePod', sublabel: 'Office' },
+  { id: 'naiyah', icon: '👤', iconClass: 'icon-person', name: 'Naiyah', sublabel: 'Family Sharing' },
+  { id: 'mac', icon: '💻', iconClass: 'icon-phone', name: 'MacBook Pro', sublabel: 'Chris\'s Mac' },
+  { id: 'phone', icon: '📞', iconClass: 'icon-call', name: 'Call Phone Number', sublabel: 'Landline, hotel, etc.' },
+];
+
+function showAddDevice() {
+  // Check which devices are already added (only in the backup list, not the modal)
+  const existingNames = [...document.querySelectorAll('#backup-list .row-label')].map(el => el.textContent);
+  // Filter out already-added devices, but always show "Call Phone Number" (can add multiple)
+  const available = availableDevices.filter(d => d.id === 'phone' || !existingNames.includes(d.name));
+
+  if (available.length === 0) {
+    alert('All available devices have been added.');
+    return;
+  }
+
+  const modal = document.getElementById('add-modal');
+  const list = document.getElementById('available-list');
+
+  list.innerHTML = available.map(d => `
+    <div class="backup-item available-device" onclick="addDevice('${d.id}')">
+      <div class="row-icon ${d.iconClass}">${d.icon}</div>
+      <div class="row-content">
+        <div class="row-label">${d.name}</div>
+        <div class="row-sublabel">${d.sublabel}</div>
+      </div>
+      <div class="row-chevron" style="color: #007aff;">+</div>
+    </div>
+  `).join('');
+
+  modal.style.display = 'flex';
+}
+
+function hideAddDevice() {
+  document.getElementById('add-modal').style.display = 'none';
+}
+
+function addDevice(id) {
+  const device = availableDevices.find(d => d.id === id);
+  if (!device) return;
+
+  // Special handling for phone number
+  if (id === 'phone') {
+    hideAddDevice();
+    setTimeout(() => {
+      const phoneNumber = prompt('Enter phone number to call:');
+      if (!phoneNumber || phoneNumber.trim() === '') return;
+
+      addDeviceToList({
+        icon: '📞',
+        iconClass: 'icon-call',
+        name: formatPhoneNumber(phoneNumber.trim()),
+        sublabel: 'Calls with automated backup message'
+      });
+    }, 100);
+    return;
+  }
+
+  addDeviceToList(device);
+  hideAddDevice();
+}
+
+function addDeviceToList(device) {
+  const list = document.getElementById('backup-list');
+  const wrappers = list.querySelectorAll('.backup-item-wrapper');
+  const newIndex = wrappers.length + 1;
+
+  const newWrapper = document.createElement('div');
+  newWrapper.className = 'backup-item-wrapper';
+
+  const newItem = document.createElement('div');
+  newItem.className = 'backup-item';
+  newItem.draggable = true;
+  newItem.innerHTML = `
+    <div class="order-num">${newIndex}</div>
+    <div class="row-icon ${device.iconClass}">${device.icon}</div>
+    <div class="row-content">
+      <div class="row-label">${device.name}</div>
+      <div class="row-sublabel">${device.sublabel}</div>
+    </div>
+    <div class="drag-handle">☰</div>
+  `;
+
+  const deleteBtn = document.createElement('div');
+  deleteBtn.className = 'delete-btn';
+  deleteBtn.textContent = 'Delete';
+  deleteBtn.onclick = function() { deleteBackup(this); };
+
+  newWrapper.appendChild(newItem);
+  newWrapper.appendChild(deleteBtn);
+
+  // Add drag listeners
+  newItem.addEventListener('dragstart', handleDragStart);
+  newItem.addEventListener('dragend', handleDragEnd);
+  newItem.addEventListener('dragover', handleDragOver);
+  newItem.addEventListener('drop', handleDrop);
+
+  // Add swipe listeners
+  setupSwipe(newItem);
+
+  list.appendChild(newWrapper);
+
+  updateTimingHint();
+}
+
+// Close modal on background click
+document.getElementById('add-modal')?.addEventListener('click', function(e) {
+  if (e.target === this) hideAddDevice();
+});
+</script>
+</body>
+</html>

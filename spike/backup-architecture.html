@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Backup Alarm — Architecture: Why Inverted?</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+    background: #0a0a0a;
+    color: #e0e0e0;
+    min-height: 100vh;
+    padding: 40px 20px;
+  }
+
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  h1 {
+    font-size: 28px;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 8px;
+    color: #fff;
+  }
+
+  .subtitle {
+    text-align: center;
+    color: #888;
+    font-size: 15px;
+    margin-bottom: 40px;
+  }
+
+  /* Tab navigation */
+  .tabs {
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    margin-bottom: 32px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #333;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .tab {
+    flex: 1;
+    padding: 14px 20px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    background: #1a1a1a;
+    color: #888;
+    border: none;
+    transition: all 0.2s;
+  }
+
+  .tab:hover { background: #222; color: #aaa; }
+
+  .tab.active-naive {
+    background: #3a1a1a;
+    color: #ff6b6b;
+  }
+
+  .tab.active-inverted {
+    background: #1a2a1a;
+    color: #51cf66;
+  }
+
+  .tab.active-cascade {
+    background: #1a1a2a;
+    color: #74c0fc;
+  }
+
+  /* Panels */
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* Diagram area */
+  .diagram {
+    background: #111;
+    border-radius: 16px;
+    padding: 32px;
+    margin-bottom: 24px;
+    border: 1px solid #222;
+    position: relative;
+    min-height: 400px;
+  }
+
+  .diagram-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .diagram-verdict {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 24px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    display: inline-block;
+  }
+
+  .verdict-fail { background: #3a1a1a; color: #ff6b6b; }
+  .verdict-pass { background: #1a2a1a; color: #51cf66; }
+  .verdict-info { background: #1a1a2a; color: #74c0fc; }
+
+  /* Flow diagram */
+  .flow {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    align-items: center;
+  }
+
+  .flow-node {
+    padding: 14px 24px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+    min-width: 220px;
+    position: relative;
+  }
+
+  .node-device {
+    background: #1a2233;
+    border: 2px solid #2a4a6a;
+    color: #74c0fc;
+  }
+
+  .node-cloud {
+    background: #1a2a1a;
+    border: 2px solid #2a5a2a;
+    color: #51cf66;
+  }
+
+  .node-action {
+    background: #2a2a1a;
+    border: 2px solid #5a5a2a;
+    color: #ffd43b;
+  }
+
+  .node-fail {
+    background: #3a1a1a;
+    border: 2px solid #6a2a2a;
+    color: #ff6b6b;
+  }
+
+  .node-success {
+    background: #1a2a1a;
+    border: 2px solid #2a5a2a;
+    color: #51cf66;
+  }
+
+  .node-cascade {
+    background: #1a1a2a;
+    border: 2px solid #2a2a6a;
+    color: #b197fc;
+  }
+
+  .node-label {
+    font-size: 11px;
+    color: #666;
+    font-weight: 400;
+    margin-top: 2px;
+  }
+
+  /* Arrows */
+  .flow-arrow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 6px 0;
+    color: #444;
+    font-size: 12px;
+    gap: 2px;
+  }
+
+  .flow-arrow .arrow-line {
+    width: 2px;
+    height: 16px;
+    background: #333;
+  }
+
+  .flow-arrow .arrow-label {
+    color: #666;
+    font-size: 11px;
+    font-weight: 500;
+  }
+
+  .arrow-fail .arrow-line { background: #6a2a2a; }
+  .arrow-fail .arrow-label { color: #ff6b6b; }
+
+  .arrow-success .arrow-line { background: #2a5a2a; }
+  .arrow-success .arrow-label { color: #51cf66; }
+
+  /* Failure callout */
+  .failure-callout {
+    background: #1a1010;
+    border: 1px solid #3a1a1a;
+    border-left: 4px solid #ff6b6b;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-top: 20px;
+  }
+
+  .failure-callout h4 {
+    color: #ff6b6b;
+    font-size: 14px;
+    margin-bottom: 6px;
+  }
+
+  .failure-callout p {
+    color: #aa6666;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  /* Success callout */
+  .success-callout {
+    background: #101a10;
+    border: 1px solid #1a3a1a;
+    border-left: 4px solid #51cf66;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-top: 20px;
+  }
+
+  .success-callout h4 {
+    color: #51cf66;
+    font-size: 14px;
+    margin-bottom: 6px;
+  }
+
+  .success-callout p {
+    color: #66aa66;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  /* Info callout */
+  .info-callout {
+    background: #10101a;
+    border: 1px solid #1a1a3a;
+    border-left: 4px solid #74c0fc;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-top: 20px;
+  }
+
+  .info-callout h4 {
+    color: #74c0fc;
+    font-size: 14px;
+    margin-bottom: 6px;
+  }
+
+  .info-callout p {
+    color: #6688aa;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  /* Comparison table */
+  .comparison {
+    margin-top: 40px;
+    background: #111;
+    border-radius: 16px;
+    padding: 24px;
+    border: 1px solid #222;
+  }
+
+  .comparison h3 {
+    font-size: 16px;
+    margin-bottom: 16px;
+    color: #fff;
+  }
+
+  .comparison table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  .comparison th {
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid #333;
+    color: #888;
+    font-weight: 600;
+  }
+
+  .comparison td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #1a1a1a;
+    vertical-align: top;
+    line-height: 1.4;
+  }
+
+  .comparison tr:last-child td { border-bottom: none; }
+
+  .cell-fail { color: #ff6b6b; }
+  .cell-pass { color: #51cf66; }
+  .cell-warn { color: #ffd43b; }
+
+  /* Cascade detail */
+  .cascade-flow {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    align-items: center;
+  }
+
+  .cascade-step {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    max-width: 500px;
+  }
+
+  .cascade-step .step-num {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .cascade-step .step-content {
+    flex: 1;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 13px;
+  }
+
+  .cascade-step .step-content strong {
+    display: block;
+    margin-bottom: 2px;
+    font-size: 14px;
+  }
+
+  .cascade-arrow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 0 4px 48px;
+    color: #444;
+    font-size: 11px;
+  }
+
+  .cascade-arrow .ca-line {
+    width: 2px;
+    height: 12px;
+    background: #333;
+  }
+
+  /* Scenario selector */
+  .scenario-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  .scenario-btn {
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    background: #1a1a1a;
+    color: #888;
+    border: 1px solid #333;
+    transition: all 0.2s;
+  }
+
+  .scenario-btn:hover { background: #222; color: #aaa; }
+  .scenario-btn.active { background: #1a1a2a; color: #74c0fc; border-color: #2a2a6a; }
+
+  .scenario-desc {
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+
+  @media (max-width: 600px) {
+    .tabs { flex-direction: column; }
+    .comparison { overflow-x: auto; }
+    .diagram { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Backup Alarm Architecture</h1>
+  <p class="subtitle">Why the inverted model is more reliable than the obvious approach</p>
+
+  <div class="tabs">
+    <div class="tab active-naive" id="tab-naive" onclick="showPanel('naive')">
+      The Obvious Way<br><span style="font-size:11px; font-weight:400;">Phone triggers backup</span>
+    </div>
+    <div class="tab" id="tab-inverted" onclick="showPanel('inverted')">
+      The Inverted Way<br><span style="font-size:11px; font-weight:400;">Cloud holds backup</span>
+    </div>
+    <div class="tab" id="tab-cascade" onclick="showPanel('cascade')">
+      The Cascade<br><span style="font-size:11px; font-weight:400;">PagerDuty-style escalation</span>
+    </div>
+  </div>
+
+  <!-- Panel 1: Naive Model -->
+  <div class="panel active" id="panel-naive">
+    <div class="diagram">
+      <div class="diagram-title">The Obvious Approach: Phone Detects Problem, Sends Backup</div>
+      <div class="diagram-verdict verdict-fail">FATAL FLAW: Fails exactly when you need it</div>
+
+      <div class="flow">
+        <div class="flow-node node-device">
+          Phone<br>
+          <span class="node-label">Running alarm + monitoring battery</span>
+        </div>
+
+        <div class="flow-arrow">
+          <div class="arrow-line"></div>
+          <div class="arrow-label">Battery gets low...</div>
+          <div class="arrow-line"></div>
+        </div>
+
+        <div class="flow-node node-action">
+          Phone detects low battery<br>
+          <span class="node-label">Tries to send backup request</span>
+        </div>
+
+        <div class="flow-arrow arrow-fail">
+          <div class="arrow-line"></div>
+          <div class="arrow-label">But the phone is dying...</div>
+          <div class="arrow-line"></div>
+        </div>
+
+        <div class="flow-node node-fail">
+          Phone dies before sending<br>
+          <span class="node-label">No backup was triggered. No alarm fires.</span>
+        </div>
+      </div>
+
+      <div class="failure-callout">
+        <h4>Why this fails</h4>
+        <p>The device responsible for detecting the problem IS the device with the problem. A dying phone can't reliably send its own distress signal. It's like asking someone who's drowning to call 911 — by the time they need help, they can't ask for it.</p>
+      </div>
+
+      <div class="failure-callout" style="margin-top: 12px;">
+        <h4>The timing problem</h4>
+        <p>Even if the phone tries to send a backup request before it dies, <strong>when does it send it?</strong> At 5%? At 3%? Battery drain is unpredictable — the phone might go from 5% to dead in minutes, or last another hour. The phone can't know the exact moment it will fail. And if it sends too early, you get false backups. If it sends too late, it's already dead.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel 2: Inverted Model -->
+  <div class="panel" id="panel-inverted">
+    <div class="diagram">
+      <div class="diagram-title">The Inverted Approach: Cloud Always Holds the Backup</div>
+      <div class="diagram-verdict verdict-pass">RELIABLE: Fails only if the cloud is down</div>
+
+      <div class="flow">
+        <div class="flow-node node-device">
+          Phone sets alarm for 5:00 AM<br>
+          <span class="node-label">Registers backup with iCloud</span>
+        </div>
+
+        <div class="flow-arrow arrow-success">
+          <div class="arrow-line"></div>
+          <div class="arrow-label">Cloud now holds the backup alarm</div>
+          <div class="arrow-line"></div>
+        </div>
+
+        <div class="flow-node node-cloud">
+          iCloud: Backup Armed<br>
+          <span class="node-label">Alarm set for 5:00 AM. Waiting for phone to check in.</span>
+        </div>
+
+        <div class="flow-arrow arrow-success">
+          <div class="arrow-line"></div>
+          <div class="arrow-label">Phone checks in periodically: "I'm alive"</div>
+          <div class="arrow-line"></div>
+        </div>
+
+        <div class="flow-node node-action" id="inverted-decision">
+          Cloud decision point<br>
+          <span class="node-label">Is the phone still checking in?</span>
+        </div>
+
+        <div style="display:flex; gap: 32px; margin-top: 16px; justify-content: center; flex-wrap: wrap;">
+          <div style="display:flex; flex-direction:column; align-items:center; gap: 8px;">
+            <div class="flow-arrow arrow-success" style="padding:4px 0;">
+              <div class="arrow-label">Phone is alive at alarm time</div>
+              <div class="arrow-line"></div>
+            </div>
+            <div class="flow-node node-device" style="min-width:200px;">
+              Phone alarm fires<br>
+              <span class="node-label">User wakes up, taps Stop (X)</span>
+            </div>
+            <div class="flow-arrow arrow-success" style="padding:4px 0;">
+              <div class="arrow-line"></div>
+              <div class="arrow-label">Stop signal sent to iCloud</div>
+              <div class="arrow-line"></div>
+            </div>
+            <div class="flow-node node-success" style="min-width:200px;">
+              Cloud disarms backup<br>
+              <span class="node-label">"User received alarm." Done.</span>
+            </div>
+          </div>
+          <div style="display:flex; flex-direction:column; align-items:center; gap: 8px;">
+            <div class="flow-arrow arrow-fail" style="padding:4px 0;">
+              <div class="arrow-label">Phone goes silent (dead)</div>
+              <div class="arrow-line"></div>
+            </div>
+            <div class="flow-node node-fail" style="min-width:200px; background:#2a1a0a; border-color:#5a3a1a; color:#ffd43b;">
+              Cloud triggers cascade<br>
+              <span class="node-label">Fires backup on other devices</span>
+            </div>
+            <div class="flow-arrow" style="padding:4px 0;">
+              <div class="arrow-line" style="background:#5a3a1a;"></div>
+              <div class="arrow-label" style="color:#ffa94d;">Waiting for Stop signal...</div>
+              <div class="arrow-line" style="background:#5a3a1a;"></div>
+            </div>
+            <div class="flow-node node-success" style="min-width:200px;">
+              User taps Stop on backup device<br>
+              <span class="node-label">Signal to cloud → resolved</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="success-callout">
+        <h4>Two signals, one purpose</h4>
+        <p><strong>Before alarm time:</strong> Phone checks in periodically ("I'm alive"). If the phone goes silent, the cloud knows something is wrong.<br><br>
+        <strong>At alarm time:</strong> When the user taps <strong>Stop (X)</strong> on any alarm — phone or backup device — that's the signal to the cloud that says <em>"a human received this alarm."</em> That's what disarms the backup. No Stop signal = keep escalating.</p>
+      </div>
+
+      <div class="success-callout" style="margin-top: 12px;">
+        <h4>The key insight</h4>
+        <p>The cloud never assumes the user is awake. It waits for proof: the <strong>Stop signal</strong>. The phone's alarm firing isn't enough — the user has to interact with it. That tap is the confirmation that travels back to the cloud and resolves the backup.</p>
+      </div>
+
+      <div class="info-callout" style="margin-top: 12px;">
+        <h4>Spotty network? Retry + grace period</h4>
+        <p>What if the phone is fine but the network is flaky? Two safeguards:<br><br>
+        <strong>1. Retry the Stop signal:</strong> Phone keeps trying to send the Stop signal (up to 5 attempts over ~60 seconds). Most network blips are transient — retries usually succeed.<br><br>
+        <strong>2. Grace period:</strong> If the phone was checking in normally before alarm time, the cloud waits 60 seconds for the Stop signal before triggering the cascade. This handles brief network outages.<br><br>
+        If both fail, the cascade fires anyway — a false backup is annoying, but a missed alarm is catastrophic. Err on the side of waking people up.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel 3: Cascade -->
+  <div class="panel" id="panel-cascade">
+    <div class="diagram">
+      <div class="diagram-title">PagerDuty-Style Cascade</div>
+      <div class="diagram-verdict verdict-info">ESCALATION: Fire → Stop / Snooze / No Response → Resolve or Escalate</div>
+
+      <!-- Signal legend -->
+      <div style="display:flex; gap:16px; margin-bottom:20px; flex-wrap:wrap;">
+        <div style="display:flex; align-items:center; gap:6px; font-size:12px;">
+          <div style="width:10px; height:10px; border-radius:50%; background:#51cf66;"></div>
+          <span style="color:#51cf66; font-weight:600;">Stop (X)</span>
+          <span style="color:#666;">→ "I'm awake." Cascade resolved.</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:6px; font-size:12px;">
+          <div style="width:10px; height:10px; border-radius:50%; background:#51cf66;"></div>
+          <span style="color:#ffd43b; font-weight:600;">Snooze</span>
+          <span style="color:#666;">→ "I heard it." Alarm worked. Cascade resolved.</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:6px; font-size:12px;">
+          <div style="width:10px; height:10px; border-radius:50%; background:#ff6b6b;"></div>
+          <span style="color:#ff6b6b; font-weight:600;">Silence</span>
+          <span style="color:#666;">→ No response at all. Cloud escalates.</span>
+        </div>
+      </div>
+
+      <div class="scenario-bar">
+        <div class="scenario-btn active" onclick="showScenario('home')">Chris Stops</div>
+        <div class="scenario-btn" onclick="showScenario('snooze_stop')">Snooze → Stop</div>
+        <div class="scenario-btn" onclick="showScenario('snooze_expire')">Snooze → Asleep</div>
+        <div class="scenario-btn" onclick="showScenario('travel')">Fire Everything</div>
+        <div class="scenario-btn" onclick="showScenario('naiyah')">Naiyah → Jen</div>
+        <div class="scenario-btn" onclick="showScenario('exhausted')">Nobody Wakes</div>
+      </div>
+
+      <div class="scenario-desc" id="scenario-desc">
+        Chris's phone dies overnight. Watch fires backup alarm. Chris taps Stop (X). Cloud receives signal — cascade resolved.
+      </div>
+
+      <div class="cascade-flow" id="cascade-flow">
+        <!-- Populated by JS -->
+      </div>
+
+      <div class="info-callout">
+        <h4>Stop = the signal to the cloud</h4>
+        <p>Each backup target fires a <strong>real alarm</strong> (not a notification — bypasses silent mode). When the user taps <strong>Stop (X)</strong>, that's not just turning off the sound — it's sending a signal back to iCloud: <em>"A human received this alarm and is awake."</em> That signal is what resolves the cascade. Without it, the cloud keeps escalating.</p>
+      </div>
+
+      <div class="info-callout" style="margin-top: 12px;">
+        <h4>Snooze = alarm worked</h4>
+        <p><strong>Snooze</strong> tells the cloud the alarm was received. If someone is snoozing, the alarm worked — no escalation needed. Snooze works exactly like normal iOS (9 min, unlimited). We don't change expected behavior. Backup only triggers on <strong>silence</strong> — no response at all.</p>
+      </div>
+
+      <div class="info-callout" style="margin-top: 12px;">
+        <h4>One alarm at a time — ordered escalation</h4>
+        <p>No symphony. User configures a <strong>backup order</strong> (not a backup "set"). Cloud fires the first online device at alarm time. If no Stop signal → escalate to next device 2 minutes later.<br><br>
+        <strong>Example (6:30 AM alarm):</strong><br>
+        • 6:30 — Watch fires (first in backup order)<br>
+        • 6:32 — If no Stop: HomePod fires<br>
+        • 6:34 — If no Stop: Jen's iPhone fires<br><br>
+        One alarm. Escalate only on silence. No devices blasting simultaneously.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Comparison Table -->
+  <div class="comparison">
+    <h3>Side-by-Side Comparison</h3>
+    <table>
+      <tr>
+        <th>Scenario</th>
+        <th>Obvious (Phone Triggers)</th>
+        <th>Inverted (Cloud Holds)</th>
+      </tr>
+      <tr>
+        <td>Phone dies at 3 AM</td>
+        <td class="cell-fail">Phone can't send signal. No backup fires.</td>
+        <td class="cell-pass">Phone stops checking in. Cloud fires backup automatically.</td>
+      </tr>
+      <tr>
+        <td>WiFi drops overnight</td>
+        <td class="cell-fail">Phone can't reach backup server. Fails silently.</td>
+        <td class="cell-pass">Cloud sees missed check-in. Treats silence as risk. Fires backup.</td>
+      </tr>
+      <tr>
+        <td>Spotty network at alarm time</td>
+        <td class="cell-fail">Backup request may fail to send. No retry logic.</td>
+        <td class="cell-pass">Stop signal retries up to 5x. Cloud gives 60s grace period. Most blips resolved.</td>
+      </tr>
+      <tr>
+        <td>Phone is fine, alarm fires normally</td>
+        <td class="cell-pass">No backup needed. Works fine.</td>
+        <td class="cell-pass">Phone disarms backup. No cascade. Silent success.</td>
+      </tr>
+      <tr>
+        <td>Backup fires but user is on silent</td>
+        <td class="cell-fail">Notification respects silent mode. User sleeps through it.</td>
+        <td class="cell-pass">Backup is a real alarm (via native iOS). Bypasses silent mode.</td>
+      </tr>
+      <tr>
+        <td>User snoozes backup alarm</td>
+        <td class="cell-fail">No concept of snooze in backup context. Alarm stops, no follow-up.</td>
+        <td class="cell-pass">Snooze = alarm worked. Cascade resolved. No need to escalate — user heard it.</td>
+      </tr>
+      <tr>
+        <td>User lives alone (no family)</td>
+        <td class="cell-warn">Can only alert the user's other devices (if they have any).</td>
+        <td class="cell-pass">Cascade through devices: Watch, HomePod, iPad, HomeKit (lights, blinds).</td>
+      </tr>
+      <tr>
+        <td>User is traveling</td>
+        <td class="cell-fail">Home devices can't reach user. No location awareness.</td>
+        <td class="cell-pass">Fires in backup order. HomePod fires first → no Stop (empty room) → Watch fires 2 min later → wakes user in hotel. Ordered escalation, no symphony.</td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<script>
+function showPanel(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => {
+    t.className = 'tab';
+  });
+
+  document.getElementById('panel-' + name).classList.add('active');
+  const tab = document.getElementById('tab-' + name);
+  if (name === 'naive') tab.classList.add('active-naive');
+  if (name === 'inverted') tab.classList.add('active-inverted');
+  if (name === 'cascade') tab.classList.add('active-cascade');
+}
+
+const scenarios = {
+  home: {
+    desc: "Chris's phone dies overnight. Phone doesn't respond at 6:30. Watch fires at 6:32 (first backup). Chris taps Stop. Resolved.",
+    steps: [
+      { num: 1, type: 'cloud', label: '6:30 — Phone doesn\'t respond', detail: 'Alarm time reached. No Stop signal from phone.', status: 'trigger' },
+      { num: 2, type: 'device', label: "6:32 — Apple Watch fires", detail: 'First backup. Haptic + sound.', status: 'fired' },
+      { num: 3, type: 'signal', label: "Chris taps Stop (X)", detail: 'Signal sent to iCloud: "I\'m awake."', status: 'stop', result: 'Cascade resolved. HomePod never fires.' },
+    ]
+  },
+  snooze_stop: {
+    desc: "Watch fires at 6:32. Chris taps Snooze. Cascade resolved — snooze means the alarm worked!",
+    steps: [
+      { num: 1, type: 'cloud', label: '6:30 — Phone doesn\'t respond', detail: 'Alarm time reached. No Stop signal from phone.', status: 'trigger' },
+      { num: 2, type: 'device', label: "6:32 — Apple Watch fires", detail: 'First backup. Haptic + sound.', status: 'fired' },
+      { num: 3, type: 'signal', label: "Chris taps Snooze", detail: 'Signal to cloud: "I heard it."', status: 'stop', result: 'Cascade resolved. Snooze = alarm worked. No escalation.' },
+    ]
+  },
+  snooze_expire: {
+    desc: "Snooze = response. If Chris is snoozing, the alarm worked — no escalation needed. Cascade only escalates on SILENCE.",
+    steps: [
+      { num: 1, type: 'cloud', label: '6:30 — Phone doesn\'t respond', detail: 'Alarm time reached. No Stop signal from phone.', status: 'trigger' },
+      { num: 2, type: 'device', label: "6:32 — Apple Watch fires", detail: 'First backup. Haptic + sound.', status: 'fired' },
+      { num: 3, type: 'signal', label: "Chris taps Snooze", detail: 'He heard the alarm. It worked.', status: 'stop', result: 'Cascade resolved. Chris can snooze as many times as iOS allows.' },
+    ]
+  },
+  travel: {
+    desc: "Chris is in a hotel. Phone dies. Backup order: HomePod → Watch. HomePod fires at 6:32 (empty room). No response → Watch fires at 6:34. Chris wakes.",
+    steps: [
+      { num: 1, type: 'cloud', label: '6:30 — Phone doesn\'t respond', detail: 'Alarm time reached. No Stop signal from phone.', status: 'trigger' },
+      { num: 2, type: 'device', label: "6:32 — HomePod fires", detail: 'First backup. Blasts in empty bedroom.', status: 'fired' },
+      { num: 3, type: 'cloud', label: "6:34 — No response from HomePod", detail: 'Cloud waited 2 min. Silence.', status: 'escalate', result: 'Escalate to next device.' },
+      { num: 4, type: 'device', label: "6:34 — Apple Watch fires", detail: 'Second backup. Wakes Chris in hotel.', status: 'fired' },
+      { num: 5, type: 'signal', label: "Chris taps Stop (X)", detail: 'Signal sent to iCloud: "I\'m awake."', status: 'stop', result: 'Cascade resolved.' },
+    ]
+  },
+  naiyah: {
+    desc: "Naiyah's phone dies. Backup order: Watch → Jen. Watch fires at 6:17 (alarm was 6:15). No response. Jen's iPhone fires at 6:19.",
+    steps: [
+      { num: 1, type: 'cloud', label: '6:15 — Phone doesn\'t respond', detail: "Naiyah's alarm time reached. No Stop signal.", status: 'trigger' },
+      { num: 2, type: 'device', label: "6:17 — Naiyah's Watch fires", detail: 'First backup. Haptic + sound.', status: 'fired' },
+      { num: 3, type: 'cloud', label: "6:19 — No response from Naiyah", detail: 'Cloud waited 2 min. Silence.', status: 'escalate', result: 'Escalate to next target.' },
+      { num: 4, type: 'person', label: "6:19 — Jen's iPhone fires", detail: 'Second backup. Family Sharing cascade.', status: 'fired' },
+      { num: 5, type: 'signal', label: "Jen taps Stop (X)", detail: 'Signal sent to iCloud: "Someone is awake."', status: 'stop', result: 'Cascade resolved. Jen goes and wakes Naiyah.' },
+    ]
+  },
+  exhausted: {
+    desc: "Chris's phone dies. Backups fire in order: 6:32 Watch, 6:34 HomePod, 6:36 Jen. Nobody responds. Cascade exhausted.",
+    steps: [
+      { num: 1, type: 'cloud', label: '6:30 — Phone doesn\'t respond', detail: 'Alarm time reached. No Stop signal from phone.', status: 'trigger' },
+      { num: 2, type: 'device', label: "6:32 — Apple Watch fires", detail: 'First backup. Haptic + sound.', status: 'fired' },
+      { num: 3, type: 'cloud', label: "6:34 — Silence", detail: 'Cloud waited 2 min. No response.', status: 'escalate', result: 'Escalate.' },
+      { num: 4, type: 'device', label: "6:34 — HomePod fires", detail: 'Second backup. Full volume.', status: 'fired' },
+      { num: 5, type: 'cloud', label: "6:36 — Silence", detail: 'Cloud waited 2 min. No response.', status: 'escalate', result: 'Escalate.' },
+      { num: 6, type: 'person', label: "6:36 — Jen's iPhone fires", detail: 'Third backup. Family cascade.', status: 'fired' },
+      { num: 7, type: 'cloud', label: "6:38 — Silence", detail: 'Cloud waited 2 min. No response.', status: 'escalate', result: 'No more targets.' },
+      { num: 8, type: 'exhausted', label: "Cascade Exhausted", detail: 'All backups tried. No one responded. (Hopefully they\'re okay!)', status: 'fail' },
+    ]
+  }
+};
+
+function showScenario(name) {
+  document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+
+  const s = scenarios[name];
+  document.getElementById('scenario-desc').textContent = s.desc;
+
+  const flow = document.getElementById('cascade-flow');
+  flow.innerHTML = '';
+
+  s.steps.forEach((step, i) => {
+    const stepEl = document.createElement('div');
+    stepEl.className = 'cascade-step';
+
+    let numColor, numBg, contentBg, contentBorder, contentColor;
+
+    if (step.status === 'trigger') {
+      numColor = '#ffd43b'; numBg = '#2a2a1a';
+      contentBg = '#1a2a1a'; contentBorder = '#2a5a2a'; contentColor = '#51cf66';
+    } else if (step.status === 'fired') {
+      numColor = '#74c0fc'; numBg = '#1a2233';
+      contentBg = '#1a2233'; contentBorder = '#2a4a6a'; contentColor = '#74c0fc';
+    } else if (step.status === 'stop') {
+      numColor = '#51cf66'; numBg = '#1a2a1a';
+      contentBg = '#1a2a1a'; contentBorder = '#2a5a2a'; contentColor = '#51cf66';
+    } else if (step.status === 'snooze') {
+      numColor = '#ffd43b'; numBg = '#2a2a1a';
+      contentBg = '#2a2a1a'; contentBorder = '#5a5a2a'; contentColor = '#ffd43b';
+    } else if (step.status === 'escalate') {
+      numColor = '#ffa94d'; numBg = '#2a1a0a';
+      contentBg = '#2a1a0a'; contentBorder = '#5a3a1a'; contentColor = '#ffa94d';
+    } else if (step.status === 'skip') {
+      numColor = '#666'; numBg = '#1a1a1a';
+      contentBg = '#1a1a1a'; contentBorder = '#333'; contentColor = '#666';
+    } else if (step.status === 'fail') {
+      numColor = '#ff6b6b'; numBg = '#3a1a1a';
+      contentBg = '#3a1a1a'; contentBorder = '#6a2a2a'; contentColor = '#ff6b6b';
+    }
+
+    stepEl.innerHTML = `
+      <div class="step-num" style="background:${numBg}; color:${numColor}; border: 2px solid ${contentBorder};">${step.num}</div>
+      <div class="step-content" style="background:${contentBg}; border: 1px solid ${contentBorder}; color:${contentColor};">
+        <strong>${step.label}</strong>
+        <div style="font-size:12px; opacity:0.8;">${step.detail}</div>
+        ${step.result ? `<div style="font-size:11px; margin-top:4px; opacity:0.7;">${step.result}</div>` : ''}
+      </div>
+    `;
+
+    flow.appendChild(stepEl);
+
+    // Add arrow between steps
+    if (i < s.steps.length - 1) {
+      const arrow = document.createElement('div');
+      arrow.className = 'cascade-arrow';
+
+      const nextStep = s.steps[i + 1];
+      let arrowText = '';
+      if (step.status === 'trigger') arrowText = 'Cloud fires backup on first target';
+      else if (step.status === 'fired') arrowText = 'Waiting for user response...';
+      else if (step.status === 'stop') arrowText = 'Stop signal received — resolved';
+      else if (step.status === 'snooze') arrowText = 'Cloud pauses, waits for Stop...';
+      else if (step.status === 'escalate') arrowText = 'No Stop signal — escalate';
+      else if (step.status === 'skip') arrowText = 'Not reachable — skip';
+
+      arrow.innerHTML = `<div class="ca-line"></div><span style="color:#555; font-size:11px;">${arrowText}</span><div class="ca-line"></div>`;
+      flow.appendChild(arrow);
+    }
+  });
+}
+
+// Initialize cascade
+showScenario('home');
+</script>
+
+</body>
+</html>
