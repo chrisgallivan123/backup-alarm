@@ -26,7 +26,7 @@ This MVP delivers two complementary features:
 
 **Solution:** When you toggle on an alarm, the system predicts whether your battery will survive until alarm time. If it won't, you see a nudge immediately — while you can still plug in.
 
-**[View Prototype →](spike/alarm-nudge-mockup.html)**
+**[View Prototype →](https://chrisgallivan123.github.io/backup-alarm/spike/alarm-nudge-mockup.html)**
 
 ```
 ┌─────────────────────────────────────────┐
@@ -43,7 +43,7 @@ This MVP delivers two complementary features:
 
 **Solution:** Configure a backup list — Watch, HomePod, family member's phone, even a landline. If your phone doesn't respond at alarm time, backups fire in sequence until someone wakes up.
 
-**[View Prototype →](spike/backup-config-mockup.html)** | **[View Architecture →](spike/backup-architecture.html)**
+**[View Prototype →](https://chrisgallivan123.github.io/backup-alarm/spike/backup-config-mockup.html)** | **[View Architecture →](https://chrisgallivan123.github.io/backup-alarm/spike/backup-architecture.html)**
 
 ```
 Your alarm: 5:00 AM
@@ -114,7 +114,7 @@ Backup never fires                  Cloud detects silence → Fires backup
 User oversleeps                     User wakes up
 ```
 
-**[Full Architecture Comparison →](spike/backup-architecture.html)**
+**[Full Architecture Comparison →](https://chrisgallivan123.github.io/backup-alarm/spike/backup-architecture.html)**
 
 ### Snooze Behavior
 
@@ -134,9 +134,9 @@ Open these in your browser to explore the validated UI:
 
 | Prototype | What It Shows | Open |
 |-----------|--------------|------|
-| **Battery Nudge Mockup** | iOS-style alarm screen with risk nudge | [Open →](spike/alarm-nudge-mockup.html) |
-| **Backup Config Mockup** | Drag-to-reorder backup list with timing preview | [Open →](spike/backup-config-mockup.html) |
-| **Architecture Diagram** | Interactive comparison of naive vs inverted models | [Open →](spike/backup-architecture.html) |
+| **Battery Nudge Mockup** | iOS-style alarm screen with risk nudge | [Open →](https://chrisgallivan123.github.io/backup-alarm/spike/alarm-nudge-mockup.html) |
+| **Backup Config Mockup** | Drag-to-reorder backup list with timing preview | [Open →](https://chrisgallivan123.github.io/backup-alarm/spike/backup-config-mockup.html) |
+| **Architecture Diagram** | Interactive comparison of naive vs inverted models | [Open →](https://chrisgallivan123.github.io/backup-alarm/spike/backup-architecture.html) |
 
 ### Running the Cascade Logic
 
