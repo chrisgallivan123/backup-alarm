@@ -179,7 +179,7 @@ This project was built with AI assistance (Claude Code) using a structured metho
 3. **ADRs as breadcrumbs** — Every significant decision documented with alternatives considered
 4. **User validation** — Both prototypes tested with a real user (Jen, Persona 2)
 5. **Stories map to prototypes** — Each story corresponds to a tangible deliverable
-6. **Methodology codified** — After completing this project, the process was turned into a repeatable skill (`/feature-formula`) that can be applied to future feature development — from problem definition through validated prototype
+6. **Methodology codified** — After completing this project, I codified the process into a reusable Claude Code skill (`/feature-formula`) that can be invoked for future feature development — taking any idea from problem definition through validated prototype using the same methodology
 
 The git history tells the story: `git log --oneline`
 
