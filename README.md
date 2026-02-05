@@ -201,9 +201,26 @@ The feature still works: prediction + critical nudge + silence when safe + backu
 
 ---
 
+## Guiding Principles
+
+These principles — developed over my career — shaped the methodology used in this project:
+
+1. **Decisions are the differentiator** — Not artifacts or story format. The trail of WHY is what matters.
+2. **Personas define the problem** — Start with WHO has the pain and WHY it hurts, not what we're building.
+3. **Riskiest assumption first** — Sequence for fastest feedback on what could kill the feature.
+4. **Simplicity over cleverness** — If it takes 5 minutes to describe, it's too complicated.
+5. **ADRs as breadcrumbs** — Every significant decision documented with alternatives considered.
+6. **Descriptive commits** — The git log tells the story. Each commit is a meaningful unit of progress.
+7. **Anticipate pushback** — Have simpler alternatives ready. Don't dismiss, acknowledge and explain.
+8. **Plan for feedback** — If you don't see feedback coming in, that's a red flag, not a green light.
+9. **Don't oversell** — If it's not AI, don't call it AI. Honesty is defensible.
+10. **Be willing to be wrong** — When feedback contradicts assumptions, update the assumptions.
+
+---
+
 ## How This Was Built
 
-This project was built with AI assistance (Claude Code) using a structured methodology:
+This project was built with AI assistance (Claude Code) following the methodology above:
 
 1. **Personas first** — Defined WHO has the pain before deciding WHAT to build
 2. **Riskiest assumption first** — Prioritized by what could kill the feature, not by user-facing value
