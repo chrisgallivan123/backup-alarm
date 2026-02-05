@@ -126,6 +126,22 @@ No "symphony" of devices blasting simultaneously. Backups fire in sequence, 2 mi
 
 **[All Design Decisions →](docs/adr/)**
 
+### Decision Timeline
+
+| When | Decision | Why | Alternatives Rejected |
+|------|----------|-----|----------------------|
+| Day 1 | Start with personas, not features | Paint the picture of real pain before solutioning | Jump straight to technical spec |
+| Day 1 | Choose alarm backup over other feature ideas | Personal experience + high stakes + clear scope | Smart home automation, health tracking |
+| Day 2 | Inverted backup model (cloud holds, phone disarms) | Dead phone can't trigger anything | Naive model where phone triggers backup |
+| Day 2 | Ordered escalation (one alarm at a time) | Avoid "symphony" of devices blasting simultaneously | Fire all backups at once |
+| Day 2 | Snooze pauses cascade, doesn't resolve it | Preserve iOS behavior users expect (per Jen) | Snooze = alarm worked, cascade resolved |
+| Day 2 | 2-minute window between escalations | Balance urgency with giving user time to respond | Immediate escalation, longer windows |
+| Day 3 | Remove "AI-powered" claims | It's simple math and cloud coordination, not AI | Keep AI branding for marketing appeal |
+| Day 3 | Stories map to prototypes, not arbitrary symmetry | Deliverables matter more than balanced story counts | Split stories to match feature 1 |
+| Day 3 | Codify methodology into reusable skill | Don't lose what worked; make it repeatable | Document once and forget |
+
+**[ADR-002: Solution Approach →](docs/adr/002-solution-approach.md)** | **[ADR-003: Prioritization →](docs/adr/003-prioritization.md)**
+
 ---
 
 ## Prototypes
