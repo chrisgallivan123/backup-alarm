@@ -124,38 +124,16 @@ Snooze **pauses** the cascade for 9 minutes — it doesn't resolve it. After sno
 
 No "symphony" of devices blasting simultaneously. Backups fire in sequence, 2 minutes apart. First device to get a response stops the cascade.
 
-**[All Design Decisions →](docs/adr/)**
+### Other Differentiating Decisions
 
-### Decision Timeline
+| Decision | Why It Matters |
+|----------|----------------|
+| Include "skeptic" persona (Thomas) | Features that annoy power users get disabled. Design for the person who will turn it off. |
+| Safe state = silence | No "all clear" confirmation. Restraint earns trust; noisy features get disabled. |
+| Prioritize by riskiest assumption | If battery prediction doesn't work, nothing else matters. Risk-first, not value-first. |
+| Remove "AI-powered" claims | It's simple math and cloud coordination. Honesty is defensible; overselling isn't. |
 
-*All decisions made in a single 5-hour working session.*
-
-| Phase | Decision | Why | Alternatives Rejected |
-|-------|----------|-----|----------------------|
-| Methodology | Apply a structured methodology built from career lessons | Guiding principles: decisions are the differentiator; personas before features; riskiest assumption first; simplicity over cleverness; validate with real users | Wing it, follow a generic template, waterfall spec |
-| Personas | Start with personas, not features | Paint the picture of real pain before solutioning | Jump straight to technical spec |
-| Personas | Choose alarm backup over other feature ideas | Personal experience + high stakes + clear scope | Smart home automation, health tracking |
-| Personas | Include "skeptic" persona (Thomas) | Need someone who will disable noisy features | Only enthusiastic adopters |
-| Personas | Apple ecosystem only | iCloud required for cross-device coordination | Cross-platform solution |
-| Solution | Two features in MVP (nudge + backup cascade) | Nudge prevents most failures; cascade catches the rest | Nudge only, cascade only |
-| Solution | Inverted backup model (cloud holds, phone disarms) | Dead phone can't trigger anything | Naive model where phone triggers backup |
-| Solution | Ordered escalation (one alarm at a time) | Avoid "symphony" of devices blasting simultaneously | Fire all backups at once |
-| Solution | Backups start at alarm+2min | Phone gets first chance to fire | Backups fire at alarm time |
-| Solution | 2-minute window between escalations | Balance urgency with giving user time to respond | Immediate escalation, longer windows |
-| Solution | Risk thresholds: >20% safe, 5-20% warning, <5% critical | Based on iOS auto-shutdown behavior around 5% | Single threshold, no warning tier |
-| Stories | Safe state = silence (no nudge when safe) | Restraint earns trust; noisy features get disabled | Always show "all clear" confirmation |
-| Stories | Prioritize by riskiest assumption first | If prediction fails, nothing else matters | Prioritize by user value or effort |
-| Stories | PM-authored stories that preserve user pain | Stories should paint the picture, not just specify | Terse engineering-style acceptance criteria |
-| Validation | Snooze pauses cascade, doesn't resolve it | Preserve iOS behavior users expect (per Jen) | Snooze = alarm worked, cascade resolved |
-| Validation | Only Stop (X) resolves cascade | Need explicit signal that user is awake | Snooze or silence could resolve |
-| Validation | Phone call backup for travelers | Works with landlines, hotels, no Apple device needed | Apple devices only |
-| Packaging | Remove "AI-powered" claims | It's simple math and cloud coordination, not AI | Keep AI branding for marketing appeal |
-| Packaging | Stories map to prototypes, not arbitrary symmetry | Deliverables matter more than balanced story counts | Split stories to match feature 1 |
-| Packaging | Skip technical design spec | Apple does the coding; prototypes ARE the deliverable | Write full engineering handoff doc |
-| Packaging | GitHub Pages for prototype links | HTML files show as code without it | Link to raw files |
-| Packaging | Codify methodology into reusable Claude Code skill | Don't lose what worked; make it repeatable | Document once and forget |
-
-**[ADR-002: Solution Approach →](docs/adr/002-solution-approach.md)** | **[ADR-003: Prioritization →](docs/adr/003-prioritization.md)** | **[ADR-005: Story Ownership →](docs/adr/005-story-ownership.md)**
+**[All Design Decisions →](docs/adr/)** — ADR-002 (Solution Approach), ADR-003 (Prioritization), ADR-005 (Story Ownership)
 
 ---
 
