@@ -178,7 +178,7 @@ These principles — developed over my career — shaped the methodology used in
 2. **Personas define the problem** — Start with WHO has the pain and WHY it hurts, not what we're building.
 3. **Riskiest assumption first** — Sequence for fastest feedback on what could kill the feature.
 4. **Simplicity over cleverness** — If it takes 5 minutes to describe, it's too complicated.
-5. **ADRs as breadcrumbs** — Every significant decision documented with alternatives considered.
+5. **Decision records as breadcrumbs** — Every significant decision documented with alternatives considered.
 6. **Descriptive commits** — The git log tells the story. Each commit is a meaningful unit of progress.
 7. **Anticipate pushback** — Have simpler alternatives ready. Don't dismiss, acknowledge and explain.
 8. **Plan for feedback** — If you don't see feedback coming in, that's a red flag, not a green light.
