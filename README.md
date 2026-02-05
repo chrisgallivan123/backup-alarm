@@ -132,7 +132,7 @@ No "symphony" of devices blasting simultaneously. Backups fire in sequence, 2 mi
 
 | Phase | Decision | Why | Alternatives Rejected |
 |-------|----------|-----|----------------------|
-| Methodology | Start with a structured methodology aligned to guiding principles | Decisions are the differentiator; fast feedback on riskiest assumptions; simplicity over cleverness | Ad-hoc exploration, waterfall spec writing |
+| Methodology | Choose a structured methodology that evaluates options before committing | Guiding principles: decisions are the differentiator; explore all options; fast feedback on riskiest assumptions | Lock in on first idea, ad-hoc exploration, waterfall spec |
 | Personas | Start with personas, not features | Paint the picture of real pain before solutioning | Jump straight to technical spec |
 | Personas | Choose alarm backup over other feature ideas | Personal experience + high stakes + clear scope | Smart home automation, health tracking |
 | Personas | Include "skeptic" persona (Thomas) | Need someone who will disable noisy features | Only enthusiastic adopters |
