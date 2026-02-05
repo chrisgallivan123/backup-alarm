@@ -104,7 +104,7 @@ When I talked to others, I found I wasn't alone:
 **Obvious approach:** Phone triggers backup when it's dying.
 **Problem:** A dead phone can't trigger anything.
 
-**Our approach:** Cloud always holds the backup. Phone's job is to *disarm* it by checking in. If the phone goes silent, the cloud fires the backup automatically.
+**Our approach:** Cloud always holds the backup. Phone's job is to *disarm* it by checking in. If the phone goes silent, the cloud fires the backup automatically. **[ADR-002 →](docs/adr/002-solution-approach.md)**
 
 ```
 NAIVE MODEL                         INVERTED MODEL
@@ -118,13 +118,11 @@ User oversleeps                     User wakes up
 
 ### Snooze Behavior
 
-Snooze **pauses** the cascade for 9 minutes — it doesn't resolve it. After snooze ends, the same device fires again. Only **Stop (X)** resolves the cascade. Users can snooze unlimited times (standard iOS behavior preserved).
+Snooze **pauses** the cascade for 9 minutes — it doesn't resolve it. After snooze ends, the same device fires again. Only **Stop (X)** resolves the cascade. Users can snooze unlimited times (standard iOS behavior preserved). **[ADR-002 →](docs/adr/002-solution-approach.md)**
 
 ### One Alarm at a Time
 
-No "symphony" of devices blasting simultaneously. Backups fire in sequence, 2 minutes apart. First device to get a response stops the cascade.
-
-**[All Design Decisions →](docs/adr/)** — ADR-002 (Solution Approach), ADR-003 (Prioritization), ADR-005 (Story Ownership)
+No "symphony" of devices blasting simultaneously. Backups fire in sequence, 2 minutes apart. First device to get a response stops the cascade. **[ADR-002 →](docs/adr/002-solution-approach.md)**
 
 ---
 

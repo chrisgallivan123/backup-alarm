@@ -61,6 +61,25 @@
 
 **Resolution:** Borrow from incident management (PagerDuty). The backup alarm requires acknowledgment (dismiss). If no dismiss within a time window, the alarm escalates to the next device/person in the cascade. The cascade continues until someone acknowledges.
 
+### Snooze Behavior (User Validation)
+
+**Challenge raised:** What happens if the user snoozes the backup alarm?
+
+**Original assumption:** Snooze = user heard it = cascade resolved.
+
+**Correction from user validation (Jen):** "Don't change iOS snooze behavior. Snooze means I want more time, not that I'm awake."
+
+**Resolution:** Snooze **pauses** the cascade for 9 minutes — it doesn't resolve it. After snooze ends, the same device fires again. Only **Stop (X)** resolves the cascade. This preserves standard iOS behavior users expect. Users can snooze unlimited times.
+
+### Ordered Escalation (One Alarm at a Time)
+
+**Challenge raised:** Should all backup devices fire at once to maximize chance of waking someone?
+
+**Resolution:** No "symphony" of devices blasting simultaneously. Backups fire in sequence, 2 minutes apart. First device to get a response (Stop) stops the cascade. Rationale:
+- Simultaneous alarms are chaotic and annoying
+- Sequential gives user time to respond before escalation
+- First response wins — no need to silence multiple devices
+
 ### Device Cascade (Single-Person Households)
 
 **Challenge raised:** What if you don't have family? Not everyone has a backup person.
