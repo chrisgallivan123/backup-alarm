@@ -1,4 +1,4 @@
-# ADR-003: Story Prioritization — Riskiest Assumption First
+# PDR-003: Story Prioritization — Riskiest Assumption First
 
 **Status:** Accepted
 **Date:** 2026-02-04

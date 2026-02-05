@@ -11,11 +11,11 @@ Both features were validated with user interviews (Jen, Persona 2).
 
 ## Feature: Battery Risk Prediction & Nudge (MVP)
 
-**Context:** These stories represent the MVP release — a nudge at alarm-set time that predicts whether your battery will last until your alarm fires. See [ADR-002](adr/002-solution-approach.md) for the full solution approach and roadmap. See [ADR-005](adr/005-story-ownership.md) for why these stories are PM-authored and preserve user pain.
+**Context:** These stories represent the MVP release — a nudge at alarm-set time that predicts whether your battery will last until your alarm fires. See [ADR-002](decisions/ADR-002-solution-approach.md) for the full solution approach and roadmap. See [PDR-005](decisions/PDR-005-story-ownership.md) for why these stories are PM-authored and preserve user pain.
 
 **Design Reference:** [Alarm Nudge Mockup](../spike/alarm-nudge-mockup.html) — validated with user interview (Jen, Persona 2).
 
-**Prioritization Rationale:** See [ADR-003](adr/003-prioritization.md)
+**Prioritization Rationale:** See [PDR-003](decisions/PDR-003-prioritization.md)
 
 ---
 

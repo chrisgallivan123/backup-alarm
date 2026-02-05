@@ -93,7 +93,7 @@ When I talked to others, I found I wasn't alone:
 | **P1** | Backup Alarm Trigger | Does the backup actually catch failures? |
 | **P1** | Phone Call Backup | Does it work for travelers without devices? |
 
-**[Full User Stories →](docs/user-stories.md)** | **[Prioritization Rationale →](docs/adr/003-prioritization.md)**
+**[Full User Stories →](docs/user-stories.md)** | **[Prioritization Rationale →](docs/decisions/PDR-003-prioritization.md)**
 
 ---
 
@@ -104,7 +104,7 @@ When I talked to others, I found I wasn't alone:
 **Obvious approach:** Phone triggers backup when it's dying.
 **Problem:** A dead phone can't trigger anything.
 
-**Our approach:** Cloud always holds the backup. Phone's job is to *disarm* it by checking in. If the phone goes silent, the cloud fires the backup automatically. **[ADR-002 →](docs/adr/002-solution-approach.md)**
+**Our approach:** Cloud always holds the backup. Phone's job is to *disarm* it by checking in. If the phone goes silent, the cloud fires the backup automatically. **[ADR-002 →](docs/decisions/ADR-002-solution-approach.md)**
 
 ```
 NAIVE MODEL                         INVERTED MODEL
@@ -118,13 +118,13 @@ User oversleeps                     User wakes up
 
 ### Snooze Behavior
 
-Snooze **pauses** the cascade for 9 minutes — it doesn't resolve it. After snooze ends, the same device fires again. Only **Stop (X)** resolves the cascade. Users can snooze unlimited times (standard iOS behavior preserved). **[ADR-002 →](docs/adr/002-solution-approach.md)**
+Snooze **pauses** the cascade for 9 minutes — it doesn't resolve it. After snooze ends, the same device fires again. Only **Stop (X)** resolves the cascade. Users can snooze unlimited times (standard iOS behavior preserved). **[ADR-002 →](docs/decisions/ADR-002-solution-approach.md)**
 
 ### One Alarm at a Time
 
-No "symphony" of devices blasting simultaneously. Backups fire in sequence, 2 minutes apart. First device to get a response stops the cascade. **[ADR-002 →](docs/adr/002-solution-approach.md)**
+No "symphony" of devices blasting simultaneously. Backups fire in sequence, 2 minutes apart. First device to get a response stops the cascade. **[ADR-002 →](docs/decisions/ADR-002-solution-approach.md)**
 
-**[All ADRs →](docs/adr/)** — Solution Approach, Prioritization, Story Ownership
+**[All Decisions →](docs/decisions/)** — ADR-002 (Solution Approach), PDR-003 (Prioritization), PDR-005 (Story Ownership)
 
 ---
 
@@ -208,10 +208,10 @@ The git history tells the story: `git log --oneline`
 Personal experience + validated user pain. See [Personas](docs/personas.md).
 
 ### "What else did you consider?"
-Three solution approaches evaluated. See [ADR-002](docs/adr/002-solution-approach.md).
+Three solution approaches evaluated. See [ADR-002](docs/decisions/ADR-002-solution-approach.md).
 
 ### "Why this priority order?"
-Riskiest assumption first. See [ADR-003](docs/adr/003-prioritization.md).
+Riskiest assumption first. See [PDR-003](docs/decisions/PDR-003-prioritization.md).
 
 ### "Couldn't you just plug in your phone?"
 Yes — and the nudge reminds you to. But cables slip, outlets fail, phones crash. The backup cascade catches what the nudge can't prevent.
@@ -232,10 +232,10 @@ backup-alarm/
 ├── docs/
 │   ├── personas.md              ← Who has this problem
 │   ├── user-stories.md          ← What we're building
-│   └── adr/
-│       ├── 002-solution-approach.md
-│       ├── 003-prioritization.md
-│       └── 005-story-ownership.md
+│   └── decisions/
+│       ├── ADR-002-solution-approach.md
+│       ├── PDR-003-prioritization.md
+│       └── PDR-005-story-ownership.md
 └── spike/
     ├── alarm-nudge-mockup.html  ← Prototype: battery nudge
     ├── backup-config-mockup.html ← Prototype: backup configuration

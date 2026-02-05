@@ -59,7 +59,7 @@
 **If session compacts, start here:**
 1. Read this file for phase status
 2. Read `docs/personas.md` for persona context
-3. Read `docs/adr/002-solution-approach.md` for solution approach
+3. Read `docs/decisions/ADR-002-solution-approach.md` for solution approach
 4. Next action: Phase 3 — write user stories with acceptance criteria
 5. MVP nudge UI and copy validated with Jen (user interview). Full cascade vision is documented but unvalidated.
 

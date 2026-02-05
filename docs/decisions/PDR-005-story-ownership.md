@@ -1,4 +1,4 @@
-# ADR-005: PM-Authored User Stories That Preserve User Pain
+# PDR-005: PM-Authored User Stories That Preserve User Pain
 
 **Status:** Accepted
 **Date:** 2026-02-04
