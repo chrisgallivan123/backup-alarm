@@ -176,12 +176,14 @@ These principles — developed over my career — shaped the methodology used in
 
 1. **Decisions are the differentiator** — Not artifacts or story format. The trail of WHY is what matters.
 2. **Personas define the problem** — Start with WHO has the pain and WHY it hurts, not what we're building.
-3. **Riskiest assumption first** — Sequence for fastest feedback on what could kill the feature.
-4. **Simplicity over cleverness** — If it takes 5 minutes to describe, it's too complicated.
-5. **Anticipate pushback** — Have simpler alternatives ready. Don't dismiss, acknowledge and explain.
-6. **Plan for feedback** — If you don't see feedback coming in, that's a red flag, not a green light.
-7. **Don't oversell** — If it's not AI, don't call it AI. Honesty is defensible.
-8. **Be willing to be wrong** — When feedback contradicts assumptions, update the assumptions.
+3. **Become the user** — The best features come from personal pain, not market research.
+4. **Riskiest assumption first** — Sequence for fastest feedback on what could kill the feature.
+5. **Simplicity over cleverness** — If it takes 5 minutes to describe, it's too complicated.
+6. **Prototype-first** — Show, don't spec. Prototypes beat documents for alignment.
+7. **Anticipate pushback** — Have simpler alternatives ready. Don't dismiss, acknowledge and explain.
+8. **Plan for feedback** — If you don't see feedback coming in, that's a red flag, not a green light.
+9. **Don't oversell** — If it's not AI, don't call it AI. Honesty is defensible.
+10. **Be willing to be wrong** — When feedback contradicts assumptions, update the assumptions.
 
 ---
 
