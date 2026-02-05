@@ -203,47 +203,18 @@ The feature still works: prediction + critical nudge + silence when safe + backu
 
 ## Guiding Principles
 
-These 25 principles — developed over my career from patterns I've seen succeed and fail — shaped the methodology used in this project.
+These principles — developed over my career — shaped the methodology used in this project:
 
-### Speed Is the Only Moat
-
-1. **Build rapid feedback loops** — Prototype in the morning, user feedback by lunch. Reject 3 rounds of internal review before talking to a real user.
-2. **Ship to concentric circles** — Staff alphas → customer betas → GA. Never ship to everyone at once.
-3. **Small teams ship faster** — 4-6 empowered full-stack builders beat a 50-person org. Key word: empowered.
-4. **Iterate with AI first** — AI teammate available 24/7. Summarize feedback, draft plans, improve prototypes before meeting with team.
-5. **Become the user** — Dogfood constantly. Use your product like a first-time user. Write friction logs. Nobody is too senior to test their own product.
-
-### Focus Is a Superpower
-
-6. **Do fewer things better** — No more than 1-3 P0 priorities per quarter. "We can do both" is a red flag.
-7. **Do the simple thing first** — Ship the simplest thing that could work. Don't optimize for scale before product-market fit.
-8. **Validate riskiest assumptions first** — If the core hypothesis is unproven, don't work on secondary features.
-9. **Protect your calendar** — Deep work requires controlled time and energy.
-10. **Say no 10x more than you say yes** — To features, meetings, and user requests that don't align. Show empathy, explain rationale.
-
-### Product Over Process
-
-11. **Reject PM theater** — Stop polishing documents and doing endless pre-meetings. Obsess about the product users actually use, not internal artifacts.
-12. **Build minimum viable plans** — One page: user problem, vision, goals, principles, solution, what you're NOT doing. Reject annual planning theater.
-13. **Prototype-first development** — Prototypes give better sense of solution than any deck. Show stakeholders and real users a prototype before creating PRD.
-14. **Obsess about details** — Default states, edge cases, copy. Doesn't matter how senior you are.
-15. **Simplify product reviews** — Empower teams to ship to beta freely. Leadership has 48 hours to review or it ships.
-
-### Be Ruthlessly Truth-Seeking
-
-16. **Arrogance is the biggest turnoff** — Best leaders are most humble. Fail repeatedly, listen.
-17. **Ban decision by committee** — Seek diverse opinions, then single person makes the call and owns the outcome.
-18. **Don't surround yourself with yes-men** — Find and reward people who ask hard questions.
-19. **Assume good intentions** — Listen to understand, not to rebut. Best debates are collaborative truth-seeking.
-20. **Be willing to be wrong** — Most decisions are reversible. Decide and learn instead of waiting for perfect info.
-
-### Builders Over Bureaucrats
-
-21. **Hire builders, not climbers** — People who genuinely care about craft. "Just figure it out" energy.
-22. **Proof of work > credentials** — Don't care about pedigree or certificates. What have you shipped? What was the impact?
-23. **Hell yes or no** — If you're not excited about a candidate, don't hire hoping it works out.
-24. **Job titles don't matter** — Best teams blur lines between PM, design, engineering. Full-stack builders who trust each other.
-25. **Aim to replace yourself** — Make yourself unnecessary. Empower others to move on to higher-order problems.
+1. **Decisions are the differentiator** — Not artifacts or story format. The trail of WHY is what matters.
+2. **Personas define the problem** — Start with WHO has the pain and WHY it hurts, not what we're building.
+3. **Riskiest assumption first** — Sequence for fastest feedback on what could kill the feature.
+4. **Simplicity over cleverness** — If it takes 5 minutes to describe, it's too complicated.
+5. **ADRs as breadcrumbs** — Every significant decision documented with alternatives considered.
+6. **Descriptive commits** — The git log tells the story. Each commit is a meaningful unit of progress.
+7. **Anticipate pushback** — Have simpler alternatives ready. Don't dismiss, acknowledge and explain.
+8. **Plan for feedback** — If you don't see feedback coming in, that's a red flag, not a green light.
+9. **Don't oversell** — If it's not AI, don't call it AI. Honesty is defensible.
+10. **Be willing to be wrong** — When feedback contradicts assumptions, update the assumptions.
 
 ---
 
