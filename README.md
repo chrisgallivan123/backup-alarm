@@ -65,7 +65,7 @@ When I talked to others, I found I wasn't alone:
 
 | Persona | Their Pain |
 |---------|-----------|
-| **Chris** (Global Professional) | Alost missed EMEA call and damaged trust with colleagues who stayed late for him |
+| **Chris** (Global Professional) | Almost missed EMEA call and damaged trust with colleagues who stayed late for him |
 | **Jen** (Parent) | One oversleep means her kids don't compete — there's no "join late" in dance |
 | **Thomas** (Three-Alarm Person) | Sets 3 alarms across 3 devices every night because he can't trust one |
 | **Naiyah** (9-year-old dancer) | Worries about letting her duet partner down if her alarm fails |
