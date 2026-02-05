@@ -124,6 +124,8 @@ Snooze **pauses** the cascade for 9 minutes — it doesn't resolve it. After sno
 
 No "symphony" of devices blasting simultaneously. Backups fire in sequence, 2 minutes apart. First device to get a response stops the cascade. **[ADR-002 →](docs/adr/002-solution-approach.md)**
 
+**[All ADRs →](docs/adr/)** — Solution Approach, Prioritization, Story Ownership
+
 ---
 
 ## Prototypes
