@@ -195,9 +195,9 @@ Built in a single 5-hour session with AI assistance (Claude Code), following a s
 |-------|---------------|
 | **Personas** | Defined 4 personas with real stakes before touching solutions |
 | **Solution exploration** | Brainstormed 3 approaches, built spikes, chose inverted model |
-| **User stories** | Wrote stories per feature, prioritized by risk (P0 = battery prediction) |
 | **Prototypes** | Built interactive mockups — nudge UI, backup config, architecture diagram |
-| **User validation** | Tested both prototypes with Jen (Persona 2); updated snooze behavior based on feedback |
+| **User validation** | Tested prototypes with Jen (Persona 2); updated snooze behavior based on feedback |
+| **User stories** | Wrote stories after validation, prioritized by risk (P0 = battery prediction) |
 | **Decisions documented** | Every significant choice recorded with alternatives considered |
 
 **Why prototypes, not code?** This feature is designed for Apple's iOS. Apple owns the alarm, battery APIs, and iCloud. We can't build it — only Apple can. Prototypes ARE the deliverable.
