@@ -6,10 +6,17 @@
  *
  * KEY INSIGHT: One reliable backup, with escalation if that fails.
  * - User configures an ordered backup list (not a backup "set")
- * - First online device in the list fires at alarm time
+ * - First online device in the list fires 2 min after alarm time
  * - If no Stop → next device fires (2 min later)
  * - Family is the final escalation tier
  * - No symphony — just one alarm at a time
+ *
+ * SNOOZE BEHAVIOR (per Jen's feedback):
+ * - Snooze PAUSES the cascade for 9 minutes (standard iOS snooze)
+ * - After 9 min, the SAME device fires again
+ * - User can snooze unlimited times (don't change iOS behavior)
+ * - Only SILENCE (no response) triggers escalation to next device
+ * - Stop (X) resolves the cascade — user is awake
  *
  * This is throwaway code to validate the backup logic.
  */
@@ -134,21 +141,28 @@ function detectMissedCheckIn(backup, { currentTime, checkInIntervalMs, alarmTime
 /**
  * User response to a backup alarm (matches iOS alarm UI):
  *   'stop'     — "I'm awake." (X button) Cascade stops. Resolved.
- *   'snooze'   — "I heard it, few more minutes." Cascade pauses.
- *                Snooze works like normal iOS — no limit.
- *                If user is snoozing, the alarm is working. No escalation.
+ *   'snooze'   — "I heard it, few more minutes." Cascade PAUSES.
+ *                After 9 min, same device fires again.
+ *                Only escalate if no response after snooze ends.
  *   null       — No interaction. Escalate after window.
  *
- * KEY INSIGHT (from Jen's feedback): Snooze = response. The alarm worked.
+ * KEY INSIGHT (from Jen's feedback): Snooze pauses, doesn't resolve.
  *   - Don't limit snoozes — that changes iOS behavior users expect
- *   - Backup only triggers on SILENCE (no response at all)
- *   - If someone is snoozing, they heard the alarm. Success.
+ *   - User can snooze unlimited times
+ *   - After each snooze (9 min), the SAME device fires again
+ *   - Only SILENCE (no response at all) triggers escalation
+ *   - Snooze means "I heard it" — but we need to make sure they actually wake up
  *
  * KEY CHANGE: One alarm at a time (no symphony)
  *   - Backup list is an ORDERED list, not a "fire all" set
  *   - First online backup fires 2 min after alarm time (phone gets first chance)
  *   - Only escalate to next device if no response received
  *   - Escalation window: 2 minutes between devices
+ *
+ * TARGET MODEL (for simulation):
+ *   target.response — initial response when alarm fires
+ *   target.responseAfterSnooze — response when alarm fires again after snooze
+ *     (can be 'stop', 'snooze' again, or null for no response)
  */
 function triggerCascade(backup, { escalationWindowMs = 120000, snoozeDurationMs = 540000 }) {
   const results = [];
@@ -161,6 +175,7 @@ function triggerCascade(backup, { escalationWindowMs = 120000, snoozeDurationMs 
       alarmFired: false,
       response: null, // 'stop' | 'snooze' | null
       escalated: false,
+      snoozeCount: 0,
     };
 
     // Skip targets iCloud can't reach (offline, no network)
@@ -176,7 +191,7 @@ function triggerCascade(backup, { escalationWindowMs = 120000, snoozeDurationMs 
 
     // Fire alarm on this target
     result.alarmFired = true;
-    result.response = target.response; // 'dismiss', 'snooze', or null
+    result.response = target.response; // 'stop', 'snooze', or null
 
     // STOP (X) — user is awake, cascade resolved
     if (target.response === 'stop') {
@@ -190,20 +205,58 @@ function triggerCascade(backup, { escalationWindowMs = 120000, snoozeDurationMs 
       };
     }
 
-    // SNOOZE — user heard it! The alarm worked.
-    // Snooze = response. No escalation needed. Cascade resolved.
+    // SNOOZE — user heard it, but wants more time
+    // Cascade PAUSES for 9 minutes, then same device fires again
     // (Per Jen's feedback: don't change iOS snooze behavior, don't limit snoozes)
     if (target.response === 'snooze') {
-      result.snoozeResult = 'alarm worked — user is snoozing';
-      results.push(result);
-      return {
-        ...backup,
-        status: 'stopped',
-        triggeredTarget: target.name,
-        resolvedBy: target.name,
-        resolveReason: 'User snoozed — alarm was received',
-        cascadeLog: results,
-      };
+      result.snoozeCount = 1;
+      result.snoozePaused = true;
+      result.snoozeDetail = `Paused for ${snoozeDurationMs / 60000} min, then fires again`;
+
+      // After snooze ends, what happens? (simulate with responseAfterSnooze)
+      const afterSnooze = target.responseAfterSnooze || null;
+
+      if (afterSnooze === 'stop') {
+        result.afterSnoozeResponse = 'stop';
+        result.snoozeResult = 'User woke up after snooze → Stop';
+        results.push(result);
+        return {
+          ...backup,
+          status: 'stopped',
+          triggeredTarget: target.name,
+          resolvedBy: target.name,
+          resolveReason: 'User stopped alarm after snooze',
+          cascadeLog: results,
+        };
+      } else if (afterSnooze === 'snooze') {
+        // User snoozed again — in real life this could continue indefinitely
+        // For simulation, we'll show it pauses again
+        result.snoozeCount = 2;
+        result.afterSnoozeResponse = 'snooze';
+        result.snoozeResult = 'User snoozed again — cascade still paused';
+        // Eventually they either stop or don't respond
+        const finalResponse = target.responseFinal || 'stop'; // assume they wake up
+        if (finalResponse === 'stop') {
+          result.finalResponse = 'stop';
+          results.push(result);
+          return {
+            ...backup,
+            status: 'stopped',
+            triggeredTarget: target.name,
+            resolvedBy: target.name,
+            resolveReason: 'User stopped alarm after multiple snoozes',
+            cascadeLog: results,
+          };
+        }
+      } else {
+        // No response after snooze — NOW we escalate
+        result.afterSnoozeResponse = null;
+        result.snoozeResult = 'No response after snooze → escalating';
+        result.escalated = true;
+        result.escalateReason = 'No response after snooze ended';
+        results.push(result);
+        continue; // move to next target in cascade
+      }
     }
 
     // NO RESPONSE — escalate after escalation window
@@ -233,7 +286,22 @@ function printResult(result) {
     if (r.response === 'stop') {
       status = 'STOPPED (awake)';
     } else if (r.response === 'snooze') {
-      status = `SNOOZED → ${r.snoozeResult || 'alarm worked'}`;
+      // Show the full snooze flow
+      let snoozeFlow = `SNOOZED (paused 9 min)`;
+      if (r.snoozeCount > 1) {
+        snoozeFlow += ` × ${r.snoozeCount}`;
+      }
+      if (r.afterSnoozeResponse === 'stop') {
+        snoozeFlow += ' → STOPPED after snooze';
+      } else if (r.afterSnoozeResponse === 'snooze') {
+        snoozeFlow += ' → snoozed again';
+        if (r.finalResponse === 'stop') {
+          snoozeFlow += ' → STOPPED';
+        }
+      } else if (r.afterSnoozeResponse === null && r.escalated) {
+        snoozeFlow += ' → no response → ESCALATED';
+      }
+      status = snoozeFlow;
     } else if (r.escalated && r.skipReason) {
       status = `SKIPPED (${r.skipReason})`;
     } else if (r.escalated) {
@@ -350,41 +418,58 @@ let result5 = triggerCascade(
 );
 printResult(result5);
 
-// Scenario 6: Chris snoozes Watch — cascade resolved (snooze = response)
-console.log('\n--- Scenario 6: Chris snoozes — alarm worked! ---');
-console.log('Watch fires → Chris snoozes → Cascade resolved. Snooze IS a response.\n');
-console.log('(Per Jen: don\'t change iOS snooze behavior. If they\'re snoozing, alarm worked.)\n');
+// Scenario 6: Chris snoozes, then wakes up
+console.log('\n--- Scenario 6: Chris snoozes, then wakes up ---');
+console.log('Watch fires → Chris snoozes → 9 min pause → Watch fires again → Chris stops\n');
+console.log('(Per Jen: snooze pauses cascade, doesn\'t resolve it. User can snooze unlimited times.)\n');
 
 let result6 = triggerCascade(
   createBackupAlarm({
     alarmTime: '5:00 AM',
     alarmLabel: 'EMEA Standup',
     cascade: [
-      { name: 'Chris\'s Apple Watch', type: 'device', online: true, response: 'snooze' },
+      { name: 'Chris\'s Apple Watch', type: 'device', online: true, response: 'snooze', responseAfterSnooze: 'stop' },
       { name: 'HomePod (Bedroom)', type: 'device', online: true, response: null },
       { name: 'Jen\'s iPhone', type: 'person', online: true, response: 'stop' },
     ],
   }),
-  { escalationWindowMs: 120000 }
+  { escalationWindowMs: 120000, snoozeDurationMs: 540000 }
 );
 printResult(result6);
 
-// Scenario 7: Naiyah snoozes — cascade resolved
-console.log('\n--- Scenario 7: Naiyah snoozes — alarm worked! ---');
-console.log('Watch fires → Naiyah snoozes → No escalation to Jen. Alarm was received.\n');
+// Scenario 7: Naiyah snoozes, doesn't respond after — escalates to Jen
+console.log('\n--- Scenario 7: Naiyah snoozes, sleeps through post-snooze alarm ---');
+console.log('Watch fires → Naiyah snoozes → 9 min pause → Watch fires again → no response → Jen\'s phone fires\n');
 
 let result7 = triggerCascade(
   createBackupAlarm({
     alarmTime: '6:15 AM',
     alarmLabel: 'Duet — Don\'t Let Riley Down',
     cascade: [
-      { name: 'Naiyah\'s Apple Watch', type: 'device', online: true, response: 'snooze' },
+      { name: 'Naiyah\'s Apple Watch', type: 'device', online: true, response: 'snooze', responseAfterSnooze: null },
       { name: 'Jen\'s iPhone', type: 'person', online: true, response: 'stop' },
     ],
   }),
-  { escalationWindowMs: 120000 }
+  { escalationWindowMs: 120000, snoozeDurationMs: 540000 }
 );
 printResult(result7);
+
+// Scenario 8: Chris snoozes twice, then wakes up
+console.log('\n--- Scenario 8: Chris snoozes twice, then finally wakes up ---');
+console.log('Watch fires → snooze → 9 min → snooze again → 9 min → stop\n');
+
+let result8 = triggerCascade(
+  createBackupAlarm({
+    alarmTime: '5:00 AM',
+    alarmLabel: 'EMEA Standup',
+    cascade: [
+      { name: 'Chris\'s Apple Watch', type: 'device', online: true, response: 'snooze', responseAfterSnooze: 'snooze', responseFinal: 'stop' },
+      { name: 'HomePod (Bedroom)', type: 'device', online: true, response: null },
+    ],
+  }),
+  { escalationWindowMs: 120000, snoozeDurationMs: 540000 }
+);
+printResult(result8);
 
 // Scenario 10: Watch is offline (no WiFi, no cellular) — skipped
 console.log('\n--- Scenario 10: Watch has no connectivity (offline) ---');

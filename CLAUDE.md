@@ -26,14 +26,16 @@
 - [x] **Phase 1: Personas & Problem Definition** — `11c51fe`
   - Chris (Global Professional), Jen (Parent), Thomas (Three-Alarm Person), Naiyah (The Kid)
   - Problem: no safety net when phone dies overnight, failure is silent and cascading
-- [ ] **Phase 2: Solution Options & Feasibility** — IN PROGRESS
-  - ADR-002 drafted but not committed
+- [x] **Phase 2: Solution Options & Feasibility** — `522ae4b`
   - Three options evaluated: prediction+push, heartbeat, threshold
   - Chose: on-device prediction with inverted backup model
-  - MVP scoped: nudge at alarm-set time based on battery prediction
-  - Vision: cascade to devices + family (PagerDuty-style), location-aware
-  - **PENDING: Spike not yet built** — need to prove prediction logic works
-  - Prototype will be web app styled like iOS alarm experience
+  - MVP: nudge at alarm-set time based on battery prediction
+  - Vision: PagerDuty-style cascade to devices + family, location-aware
+  - Spike validated linear drain model across all persona scenarios
+  - Mockup styled as iOS alarm — toggle on, see nudge
+  - User interview with Jen: concept validated, copy refined
+  - Key quote: "If it popped this up, I would have plugged it in"
+  - Jen independently suggested cascade trigger (roadmap validation)
 - [ ] **Phase 3: User Stories & Prioritization**
 - [ ] **Phase 4: Technical Design, Tech Stack & Repo Setup**
 - [ ] **Phase 5–N: TDD Implementation Slices**
@@ -48,7 +50,7 @@
 | ADR | Decision | Status |
 |-----|----------|--------|
 | 001 | Feature: backup alarm for battery failure | Accepted (in brain, to be formalized) |
-| 002 | Solution: on-device prediction, inverted backup model, MVP = nudge at alarm-set time | Drafted, pending spike + commit |
+| 002 | Solution: on-device prediction, inverted backup model, MVP = nudge at alarm-set time | Accepted — MVP nudge validated with user interview; full cascade approach not yet validated |
 
 ---
 
@@ -58,8 +60,8 @@
 1. Read this file for phase status
 2. Read `docs/personas.md` for persona context
 3. Read `docs/adr/002-solution-approach.md` for solution approach
-4. Next action: build the prediction spike, fold findings into ADR-002, commit Phase 2
-5. After Phase 2: write user stories (Phase 3)
+4. Next action: Phase 3 — write user stories with acceptance criteria
+5. MVP nudge UI and copy validated with Jen (user interview). Full cascade vision is documented but unvalidated.
 
 ---
 

@@ -580,9 +580,9 @@
           <span style="color:#666;">→ "I'm awake." Cascade resolved.</span>
         </div>
         <div style="display:flex; align-items:center; gap:6px; font-size:12px;">
-          <div style="width:10px; height:10px; border-radius:50%; background:#51cf66;"></div>
+          <div style="width:10px; height:10px; border-radius:50%; background:#ffd43b;"></div>
           <span style="color:#ffd43b; font-weight:600;">Snooze</span>
-          <span style="color:#666;">→ "I heard it." Alarm worked. Cascade resolved.</span>
+          <span style="color:#666;">→ Cascade pauses 9 min. Same device fires again.</span>
         </div>
         <div style="display:flex; align-items:center; gap:6px; font-size:12px;">
           <div style="width:10px; height:10px; border-radius:50%; background:#ff6b6b;"></div>
@@ -594,7 +594,7 @@
       <div class="scenario-bar">
         <div class="scenario-btn active" onclick="showScenario('home')">Chris Stops</div>
         <div class="scenario-btn" onclick="showScenario('snooze_stop')">Snooze → Stop</div>
-        <div class="scenario-btn" onclick="showScenario('snooze_expire')">Snooze → Asleep</div>
+        <div class="scenario-btn" onclick="showScenario('snooze_escalate')">Snooze → Escalate</div>
         <div class="scenario-btn" onclick="showScenario('travel')">Fire Everything</div>
         <div class="scenario-btn" onclick="showScenario('naiyah')">Naiyah → Jen</div>
         <div class="scenario-btn" onclick="showScenario('exhausted')">Nobody Wakes</div>
@@ -614,8 +614,8 @@
       </div>
 
       <div class="info-callout" style="margin-top: 12px;">
-        <h4>Snooze = alarm worked</h4>
-        <p><strong>Snooze</strong> tells the cloud the alarm was received. If someone is snoozing, the alarm worked — no escalation needed. Snooze works exactly like normal iOS (9 min, unlimited). We don't change expected behavior. Backup only triggers on <strong>silence</strong> — no response at all.</p>
+        <h4>Snooze = pause, not resolve</h4>
+        <p><strong>Snooze</strong> pauses the cascade for 9 minutes. After snooze ends, the <strong>same device fires again</strong>. User can snooze unlimited times (standard iOS behavior). Only <strong>silence</strong> (no response for 2 min after an alarm fires) triggers escalation to the next device. <strong>Stop (X)</strong> is the only way to resolve the cascade.</p>
       </div>
 
       <div class="info-callout" style="margin-top: 12px;">
@@ -667,7 +667,7 @@
       <tr>
         <td>User snoozes backup alarm</td>
         <td class="cell-fail">No concept of snooze in backup context. Alarm stops, no follow-up.</td>
-        <td class="cell-pass">Snooze = alarm worked. Cascade resolved. No need to escalate — user heard it.</td>
+        <td class="cell-pass">Snooze pauses cascade 9 min. Same device fires again. User can snooze unlimited times. Only silence escalates.</td>
       </tr>
       <tr>
         <td>User lives alone (no family)</td>
@@ -707,19 +707,25 @@ const scenarios = {
     ]
   },
   snooze_stop: {
-    desc: "Watch fires at 6:32. Chris taps Snooze. Cascade resolved — snooze means the alarm worked!",
+    desc: "Watch fires at 6:32. Chris taps Snooze. Cascade pauses 9 min. Watch fires again at 6:41. Chris taps Stop. Resolved.",
     steps: [
       { num: 1, type: 'cloud', label: '6:30 — Phone doesn\'t respond', detail: 'Alarm time reached. No Stop signal from phone.', status: 'trigger' },
       { num: 2, type: 'device', label: "6:32 — Apple Watch fires", detail: 'First backup. Haptic + sound.', status: 'fired' },
-      { num: 3, type: 'signal', label: "Chris taps Snooze", detail: 'Signal to cloud: "I heard it."', status: 'stop', result: 'Cascade resolved. Snooze = alarm worked. No escalation.' },
+      { num: 3, type: 'signal', label: "Chris taps Snooze", detail: 'Cascade pauses for 9 minutes.', status: 'snooze', result: 'Paused. Watch will fire again at 6:41.' },
+      { num: 4, type: 'device', label: "6:41 — Apple Watch fires again", detail: 'Post-snooze alarm. Same device.', status: 'fired' },
+      { num: 5, type: 'signal', label: "Chris taps Stop (X)", detail: 'Signal sent to iCloud: "I\'m awake."', status: 'stop', result: 'Cascade resolved.' },
     ]
   },
-  snooze_expire: {
-    desc: "Snooze = response. If Chris is snoozing, the alarm worked — no escalation needed. Cascade only escalates on SILENCE.",
+  snooze_escalate: {
+    desc: "Chris snoozes, then sleeps through the post-snooze alarm. After 2 min of silence, cascade escalates to HomePod.",
     steps: [
       { num: 1, type: 'cloud', label: '6:30 — Phone doesn\'t respond', detail: 'Alarm time reached. No Stop signal from phone.', status: 'trigger' },
       { num: 2, type: 'device', label: "6:32 — Apple Watch fires", detail: 'First backup. Haptic + sound.', status: 'fired' },
-      { num: 3, type: 'signal', label: "Chris taps Snooze", detail: 'He heard the alarm. It worked.', status: 'stop', result: 'Cascade resolved. Chris can snooze as many times as iOS allows.' },
+      { num: 3, type: 'signal', label: "Chris taps Snooze", detail: 'Cascade pauses for 9 minutes.', status: 'snooze', result: 'Paused. Watch will fire again at 6:41.' },
+      { num: 4, type: 'device', label: "6:41 — Apple Watch fires again", detail: 'Post-snooze alarm. Same device.', status: 'fired' },
+      { num: 5, type: 'cloud', label: "6:43 — No response", detail: 'Cloud waited 2 min. Silence.', status: 'escalate', result: 'Escalate to next device.' },
+      { num: 6, type: 'device', label: "6:43 — HomePod fires", detail: 'Second backup. Louder.', status: 'fired' },
+      { num: 7, type: 'signal', label: "Chris taps Stop (X)", detail: 'Signal sent to iCloud.', status: 'stop', result: 'Cascade resolved.' },
     ]
   },
   travel: {
@@ -817,7 +823,7 @@ function showScenario(name) {
       if (step.status === 'trigger') arrowText = 'Cloud fires backup on first target';
       else if (step.status === 'fired') arrowText = 'Waiting for user response...';
       else if (step.status === 'stop') arrowText = 'Stop signal received — resolved';
-      else if (step.status === 'snooze') arrowText = 'Cloud pauses, waits for Stop...';
+      else if (step.status === 'snooze') arrowText = 'Paused 9 min, same device fires again';
       else if (step.status === 'escalate') arrowText = 'No Stop signal — escalate';
       else if (step.status === 'skip') arrowText = 'Not reachable — skip';
 
