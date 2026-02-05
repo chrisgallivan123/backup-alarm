@@ -124,15 +124,6 @@ Snooze **pauses** the cascade for 9 minutes — it doesn't resolve it. After sno
 
 No "symphony" of devices blasting simultaneously. Backups fire in sequence, 2 minutes apart. First device to get a response stops the cascade.
 
-### Other Differentiating Decisions
-
-| Decision | Why It Matters |
-|----------|----------------|
-| Include "skeptic" persona (Thomas) | Features that annoy power users get disabled. Design for the person who will turn it off. |
-| Safe state = silence | No "all clear" confirmation. Restraint earns trust; noisy features get disabled. |
-| Prioritize by riskiest assumption | If battery prediction doesn't work, nothing else matters. Risk-first, not value-first. |
-| Remove "AI-powered" claims | It's simple math and cloud coordination. Honesty is defensible; overselling isn't. |
-
 **[All Design Decisions →](docs/adr/)** — ADR-002 (Solution Approach), ADR-003 (Prioritization), ADR-005 (Story Ownership)
 
 ---
