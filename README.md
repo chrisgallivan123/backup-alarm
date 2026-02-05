@@ -189,14 +189,20 @@ These principles — developed over my career — shaped the methodology used in
 
 ## How This Was Built
 
-This project was built with AI assistance (Claude Code) following the methodology above:
+Built in a single 5-hour session with AI assistance (Claude Code), following a structured methodology:
 
-1. **Personas first** — Defined WHO has the pain before deciding WHAT to build
-2. **Riskiest assumption first** — Prioritized by what could kill the feature, not by user-facing value
-3. **ADRs as breadcrumbs** — Every significant decision documented with alternatives considered
-4. **User validation** — Both prototypes tested with a real user (Jen, Persona 2)
-5. **Stories map to prototypes** — Each story corresponds to a tangible deliverable
-6. **Methodology codified** — After completing this project, I codified the process into a reusable Claude Code skill (`/feature-formula`) that can be invoked for future feature development — taking any idea from problem definition through validated prototype using the same methodology
+| Phase | What Happened |
+|-------|---------------|
+| **Personas** | Defined 4 personas with real stakes before touching solutions |
+| **Solution exploration** | Brainstormed 3 approaches, built spikes, chose inverted model |
+| **User stories** | Wrote stories per feature, prioritized by risk (P0 = battery prediction) |
+| **Prototypes** | Built interactive mockups — nudge UI, backup config, architecture diagram |
+| **User validation** | Tested both prototypes with Jen (Persona 2); updated snooze behavior based on feedback |
+| **Decisions documented** | Every significant choice recorded with alternatives considered |
+
+**Why prototypes, not code?** This feature is designed for Apple's iOS. Apple owns the alarm, battery APIs, and iCloud. We can't build it — only Apple can. Prototypes ARE the deliverable.
+
+**Methodology codified:** After this project, I captured the process as a reusable Claude Code skill (`/feature-formula`) for future feature development.
 
 The git history tells the story: `git log --oneline`
 
