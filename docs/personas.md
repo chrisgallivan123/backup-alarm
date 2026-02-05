@@ -102,4 +102,4 @@ Current workarounds (multiple alarms, multiple devices, charging rituals) are fr
 
 **The gap:** There is no system that detects when an alarm is at risk of not firing and routes a backup notification to another device before it's too late. The technology to predict battery failure and send cross-device notifications exists — it's just not connected to the alarm clock.
 
-**The opportunity:** An AI-powered backup system that monitors alarm risk in real time, predicts battery failure before it happens, and ensures the alarm reaches the user through an alternate path — or through someone they trust. The AI isn't a feature bolted onto the alarm — the AI IS the reliability layer that makes the alarm trustworthy again.
+**The opportunity:** A backup system that predicts battery risk at alarm-set time and routes the alarm through alternate devices if the phone fails. The technology is simple — battery math and cloud coordination — but the pieces have never been connected to the alarm clock. The solution doesn't require AI; it requires Apple to use what they already have: iCloud, device awareness, and Family Sharing.
